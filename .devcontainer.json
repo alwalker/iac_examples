@@ -1,0 +1,22 @@
+{
+    "image": "outline_vscode",
+    "runArgs": [
+        "--userns=keep-id"
+    ],
+    "remoteUser": "root",
+    "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,z,type=bind",
+    "workspaceFolder": "/workspace",
+    // ],
+    // "containerEnv": {
+    //     "MY_CONTAINER_VAR": "some-value-here",
+    //     "MY_CONTAINER_VAR2": "${localEnv:SOME_LOCAL_VAR}"
+    // },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "streetsidesoftware.code-spell-checker",
+                "hashicorp.terraform"
+            ]
+        }
+    }
+}

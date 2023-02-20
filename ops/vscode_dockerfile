@@ -1,0 +1,57 @@
+ARG FEDORA_VERSION=37
+ARG FEDORA_ARCH=x86_64
+FROM registry.fedoraproject.org/fedora:$FEDORA_VERSION-$FEDORA_ARCH
+
+RUN dnf install -y --refresh \
+    dnf-plugins-core \
+    ncurses \
+    less \
+    gcc \
+    glibc \
+    libgcc \
+    libstdc++ \
+    graphviz \
+    git \
+    python \
+    ca-certificates \
+    tar \
+    wget \
+    tree \
+    vim \
+    unzip \
+    postgresql \
+    redis \
+    ansible \
+    && dnf clean all
+
+#Minio
+RUN curl -s https://dl.min.io/client/mc/release/linux-amd64/mc -o mc \
+    && chmod +x mc \
+    && mv mc /usr/local/bin
+
+RUN dnf config-manager --add-repo https://rpm.releases.hashicorp.com/fedora/hashicorp.repo \
+    && dnf -y install packer terraform
+
+ARG FEDORA_VERSION=36
+RUN rpm --import https://packages.microsoft.com/keys/microsoft.asc \
+    && dnf install -y https://packages.microsoft.com/config/fedora/${FEDORA_VERSION}/packages-microsoft-prod.rpm \
+    && dnf install -y azure-cli \
+    && dnf clean all
+
+RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
+    && unzip -u awscliv2.zip \
+    && ./aws/install -i /usr/local/aws-cli -b /usr/local/bin \
+    && rm -rf aws \
+    && rm -f awscliv2.zip
+
+RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" \
+    && chmod +x kubectl \
+    && mv kubectl /usr/local/bin
+
+RUN curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 \
+    && chmod 700 get_helm.sh \
+    && ./get_helm.sh --no-sudo \
+    && rm -f get_helm.sh
+
+RUN dnf module install -y nodejs:18/common \
+    && dnf clean all
