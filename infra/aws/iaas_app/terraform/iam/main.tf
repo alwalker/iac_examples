@@ -1,5 +1,5 @@
-resource "aws_iam_role" "api" {
-  name        = "${var.basename}-api"
+resource "aws_iam_role" "main" {
+  name        = var.name
   description = "Allows EC2 tasks to do the things"
 
   assume_role_policy = <<EOF
@@ -17,31 +17,31 @@ resource "aws_iam_role" "api" {
 }
 EOF
 
-  tags = merge(map(
-    "Name", "${var.basename}-api"),
-  var.default_tags)
+  tags = var.default_tags
 }
-data "template_file" "api-policies" {
-  template = file("../iam/policies/api.json")
+
+data "template_file" "policies" {
+  template = file("${path.module}/policy.json")
 
   vars = {
-    bucket_name = "$CUSTOMER-cicd"
+    bucket_name = var.cicd_bucket_name
   }
 }
-resource "aws_iam_policy" "api" {
-  name        = "${var.basename}-api"
+
+resource "aws_iam_policy" "main" {
+  name        = var.name
   description = "Grant api permisions to do the things"
-  policy      = data.template_file.api-policies.rendered
+  policy      = data.template_file.policies.rendered
 }
-resource "aws_iam_role_policy_attachment" "api" {
-  role       = aws_iam_role.api.name
-  policy_arn = aws_iam_policy.api.arn
+resource "aws_iam_role_policy_attachment" "main" {
+  role       = aws_iam_role.main.name
+  policy_arn = aws_iam_policy.main.arn
 }
 resource "aws_iam_role_policy_attachment" "cloudwatchagent" {
-  role       = aws_iam_role.api.name
+  role       = aws_iam_role.main.name
   policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
 }
-resource "aws_iam_instance_profile" "api" {
-  name = "${var.basename}-api"
-  role = aws_iam_role.api.id
+resource "aws_iam_instance_profile" "main" {
+  name = var.name
+  role = aws_iam_role.main.id
 }

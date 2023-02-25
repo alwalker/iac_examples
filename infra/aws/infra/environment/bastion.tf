@@ -21,11 +21,11 @@ resource "aws_security_group" "bastion" {
 }
 
 resource "tls_private_key" "bastion_ssh_key" {
-  algorithm = "RSA"
-  rsa_bits  = 4096
+  algorithm = "ED25519"
 }
 resource "aws_secretsmanager_secret" "bastion_ssh_private_key" {
   name = "bastion-ssh-private-key"
+  force_overwrite_replica_secret = true
 
   tags = var.default_tags
 }
@@ -35,7 +35,7 @@ resource "aws_secretsmanager_secret_version" "bastion_ssh_private_key" {
 }
 resource "aws_key_pair" "bastion" {
   key_name   = "${var.env_name}-bastion-key"
-  public_key = tls_private_key.bastion_ssh_key.public_key_openssh
+  public_key = trimspace(tls_private_key.bastion_ssh_key.public_key_openssh)
 
   tags = var.default_tags
 }
@@ -68,7 +68,6 @@ resource "aws_instance" "bastion" {
   associate_public_ip_address = true
   user_data                   = <<-EOT
   #!/usr/bin/bash -xe
-  dnf install -y epel-release
   dnf install -y atop screen postgresql tree nc bind-utils curl wget lsof zip unzip
   EOT
 
@@ -81,7 +80,7 @@ resource "aws_instance" "bastion" {
     ignore_changes = [ami]
   }
 
-  tags = var.default_tags
+  tags = merge({ Name = "${var.env_name}-bastion" }, var.default_tags)
 }
 
 resource "aws_route53_record" "bastion" {

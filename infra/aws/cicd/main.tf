@@ -1,8 +1,15 @@
 terraform {
   backend "s3" {
-    bucket = "$CUSTOMER-terraform"
-    key    = "cicd"
-    region = "us-east-1"
+    region         = "us-east-1"
+    bucket         = "awsiac-devops"
+    key            = "terraform-states/cicd"
+    dynamodb_table = "terraform-states-cicd" #LockID
+  }
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 4.0"
+    }
   }
 }
 
@@ -10,15 +17,24 @@ provider "aws" {
   region = "us-east-1"
 }
 
-resource "aws_s3_bucket" "main" {
-  bucket = "alw-example-cicd"
-  acl    = "private"
+locals {
+  cicd_bucket_name = "alwiac-cicd"
+}
 
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        sse_algorithm = "AES256"
-      }
+resource "aws_kms_key" "bucket_key" {
+  deletion_window_in_days = 10
+}
+resource "aws_s3_bucket" "main" {
+  bucket = local.cicd_bucket_name
+  acl    = "private"
+}
+resource "aws_s3_bucket_server_side_encryption_configuration" "main" {
+  bucket = aws_s3_bucket.main.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      kms_master_key_id = aws_kms_key.bucket_key.arn
+      sse_algorithm     = "aws:kms"
     }
   }
 }

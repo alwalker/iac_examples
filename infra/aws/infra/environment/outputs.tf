@@ -8,7 +8,7 @@ output "dns_zone" {
 output "database" {
   value = aws_db_instance.main
 }
-output "database_admin_password" {
+output "database_admin_username" {
   value = var.database_admin_username
 }
 output "database_admin_password" {
@@ -26,6 +26,10 @@ output "bastion" {
 }
 output "bastion_dns_name" {
   value = aws_route53_record.bastion.name
+}
+
+output "outline_security_group_id" {
+  value = aws_security_group.outline.id
 }
 
 output "alb" {

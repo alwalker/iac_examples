@@ -28,10 +28,11 @@ resource "aws_security_group" "database" {
 
 resource "random_password" "database_admin_password" {
   length           = 32
-  override_special = "!@%*()-_=+[]{}:?"
+  override_special = "!%*()-_=+[]{}:?"
 }
 resource "aws_secretsmanager_secret" "database_admin_password" {
   name = "database-admin-password"
+  force_overwrite_replica_secret = true
 
   tags = var.default_tags
 }

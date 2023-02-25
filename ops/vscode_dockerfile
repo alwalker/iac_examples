@@ -5,6 +5,7 @@ FROM registry.fedoraproject.org/fedora:$FEDORA_VERSION-$FEDORA_ARCH
 RUN dnf install -y --refresh \
     dnf-plugins-core \
     ncurses \
+    nc \
     less \
     gcc \
     glibc \
@@ -22,6 +23,8 @@ RUN dnf install -y --refresh \
     postgresql \
     redis \
     ansible \
+    jq \
+    lsof \
     && dnf clean all
 
 #Minio
