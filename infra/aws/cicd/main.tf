@@ -1,7 +1,7 @@
 terraform {
   backend "s3" {
     region         = "us-east-1"
-    bucket         = "awsiac-devops"
+    bucket         = "awsiac-devops2"
     key            = "terraform-states/cicd"
     dynamodb_table = "terraform-states-cicd" #LockID
   }
@@ -18,7 +18,7 @@ provider "aws" {
 }
 
 locals {
-  cicd_bucket_name = "alwiac-cicd"
+  cicd_bucket_name = "alwiac-cicd2"
 }
 
 resource "aws_kms_key" "bucket_key" {
@@ -26,6 +26,9 @@ resource "aws_kms_key" "bucket_key" {
 }
 resource "aws_s3_bucket" "main" {
   bucket = local.cicd_bucket_name
+}
+resource "aws_s3_bucket_acl" "main" {
+  bucket = aws_s3_bucket.main.id
   acl    = "private"
 }
 resource "aws_s3_bucket_server_side_encryption_configuration" "main" {

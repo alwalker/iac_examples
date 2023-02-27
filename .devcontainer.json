@@ -15,7 +15,8 @@
         "vscode": {
             "extensions": [
                 "streetsidesoftware.code-spell-checker",
-                "hashicorp.terraform"
+                "hashicorp.terraform",
+                "hashicorp.hcl"
             ]
         }
     }

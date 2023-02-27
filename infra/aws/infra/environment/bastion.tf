@@ -26,6 +26,7 @@ resource "tls_private_key" "bastion_ssh_key" {
 resource "aws_secretsmanager_secret" "bastion_ssh_private_key" {
   name = "bastion-ssh-private-key"
   force_overwrite_replica_secret = true
+  recovery_window_in_days = 0
 
   tags = var.default_tags
 }
@@ -61,7 +62,7 @@ data "aws_ami" "centos-stream" {
 
 resource "aws_instance" "bastion" {
   ami                         = data.aws_ami.centos-stream.id
-  instance_type               = "t3a.nano"
+  instance_type               = "t3a.medium"
   vpc_security_group_ids      = [aws_security_group.bastion.id]
   subnet_id                   = module.vpc.public_subnets[0]
   key_name                    = aws_key_pair.bastion.key_name

@@ -1,8 +1,0 @@
-export Logging__LogLevel__Default=Debug
-export Logging__LogLevel__System=Information
-export Logging__LogLevel__Microsoft=Information
-export Logging__LogLevel__Hangfire=Information
-export ConnectionStrings__$CUSTOMERDB=__DB_CONN_STRING__
-export jwt_key=__JWT__
-export jwt_issuer=auth-backend
-export jwt_audience=$CUSTOMER

@@ -5,6 +5,7 @@ resource "tls_private_key" "ssh_key" {
 resource "aws_secretsmanager_secret" "ssh_key" {
   name = "${var.name}-ssh-private-key"
   force_overwrite_replica_secret = true
+  recovery_window_in_days = 0
 
   tags = var.default_tags
 }

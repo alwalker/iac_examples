@@ -5,52 +5,40 @@ dnf update -y --refresh
 
 #install helpful tools
 dnf install -y epel-release
-dnf install -y vim screen atop tree nc bind-utils curl jq lsof unzip wget
+dnf install -y vim screen atop tree nc bind-utils curl jq lsof unzip wget podman
 
 #setup awscli
 curl -s "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
 unzip -q awscliv2.zip
 ./aws/install
 ln -s /usr/local/bin/aws /usr/bin/aws
+rm -rf aws
+rm -f awscliv2.zip
 
-#setup dotnet
-dnf install -y aspnetcore-runtime-3.1
 
-#setup api user
-useradd -c "$CUSTOMER API User" -s /bin/bash -m $CUSTOMER
+#setup user
+useradd -c "Outline User" -s /bin/bash -m outline
 
-#setup api directories
-mkdir /opt/api
-aws s3 cp s3://$CUSTOMER-cicd/api.$CI_PIPELINE_ID.tar.gz /tmp/api.tar.gz
-tar -xzf /tmp/api.tar.gz -C /opt/api
-chown -R $CUSTOMER:$CUSTOMER /opt/api
-
+#setup configs
 mkdir /opt/configs
-chown $CUSTOMER:$CUSTOMER /opt/configs
+# echo "REPLACE ME" > /opt/configs/env
+aws s3 cp s3://alwiac-cicd2/outline-prod-env /opt/configs/env
+chown -R outline:outline /opt/configs
 
-#setup api systemd unit 
-cat << EOF > /lib/systemd/system/$CUSTOMER-api.service
-[Unit]
-Description=$CUSTOMER API
+#create pod
+cd /tmp #podman tries to do things in whatever directory you run the command in
+sudo -u outline podman create \
+    --name outline \
+    --pull missing \
+    --env-file /opt/configs/env \
+    --publish 6100:3000 \
+    docker.io/outlinewiki/outline:latest
 
-[Service]
-User=$CUSTOMER
-WorkingDirectory=/opt/api
-ExecStart=/usr/local/src/start_api.sh
-Restart=on-failure
-RestartSec=30
-Type=simple
-
-[Install]
-WantedBy=multi-user.target
-EOF
-systemctl daemon-reload
-
-#setup app
-aws s3 cp s3://$CUSTOMER-cicd/start_api.sh /usr/local/src/start_api.sh
-chown $CUSTOMER:$CUSTOMER /usr/local/src/start_api.sh
-chmod 700 /usr/local/src/start_api.sh
-systemctl enable $CUSTOMER-api
+#setup outline systemd unit
+sudo -u outline mkdir -p /home/outline/.config/systemd/user
+sudo -u outline podman generate systemd --restart-policy=on-failure outline > /home/outline/.config/systemd/user/outline.service
+systemctl --user -M outline@ daemon-reload
+systemctl --user -M outline@ enable outline.service
 
 #setup cloudwatch agent
 wget --quiet "https://s3.amazonaws.com/amazoncloudwatch-agent/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm"

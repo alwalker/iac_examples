@@ -1,4 +1,4 @@
-echo "127.0.0.1 ${bastion_host_ip}" >> /etc/hosts
+echo "127.0.0.1 ${database_host_name}" >> /etc/hosts
 
 ssh -N -v \
     -i ${ssh_key_path} \

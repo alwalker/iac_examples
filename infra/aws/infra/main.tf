@@ -1,7 +1,7 @@
 terraform {
   backend "s3" {
     region         = "us-east-1"
-    bucket         = "awsiac-devops"
+    bucket         = "awsiac-devops2"
     key            = "terraform-states/infra"
     dynamodb_table = "terraform-states-infra" #LockID
   }
@@ -45,7 +45,7 @@ resource "local_sensitive_file" "bastion_ssh_public_key" {
     content = module.prod.bastion_ssh_public_key
     filename = "${local.bastion_ssh_key_path}_pub"
 }
-resource "template_file" "ssh_tunnel_setup_script" {
+data "template_file" "ssh_tunnel_setup_script" {
     template = file("${path.module}/../setup_bastion_tunnel.tftpl")
 
     vars = {
@@ -56,6 +56,6 @@ resource "template_file" "ssh_tunnel_setup_script" {
     }
 }
 resource "local_file" "setup_bastion_tunnel_script" {
-    content = template_file.ssh_tunnel_setup_script.rendered
+    content = data.template_file.ssh_tunnel_setup_script.rendered
     filename = "${path.module}/../setup_bastion_tunnel.sh"
 }

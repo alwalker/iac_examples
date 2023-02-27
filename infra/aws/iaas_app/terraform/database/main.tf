@@ -13,6 +13,7 @@ resource "random_password" "main" {
 resource "aws_secretsmanager_secret" "password" {
   name = "database-${var.name}-password"
   force_overwrite_replica_secret = true
+  recovery_window_in_days = 0
 
   tags = var.default_tags
 }
