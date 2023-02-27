@@ -24,9 +24,9 @@ resource "tls_private_key" "bastion_ssh_key" {
   algorithm = "ED25519"
 }
 resource "aws_secretsmanager_secret" "bastion_ssh_private_key" {
-  name = "bastion-ssh-private-key"
+  name                           = "bastion-ssh-private-key"
   force_overwrite_replica_secret = true
-  recovery_window_in_days = 0
+  recovery_window_in_days        = 0
 
   tags = var.default_tags
 }

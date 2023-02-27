@@ -31,9 +31,9 @@ resource "random_password" "database_admin_password" {
   override_special = "!%*()-_=+[]{}:?"
 }
 resource "aws_secretsmanager_secret" "database_admin_password" {
-  name = "database-admin-password"
+  name                           = "database-admin-password"
   force_overwrite_replica_secret = true
-  recovery_window_in_days = 0  
+  recovery_window_in_days        = 0
 
   tags = var.default_tags
 }
@@ -48,7 +48,7 @@ resource "aws_db_instance" "main" {
       latest_restorable_time
     ]
   }
-  
+
   allocated_storage           = var.database_storage_size_gb
   allow_major_version_upgrade = false
   apply_immediately           = false

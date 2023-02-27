@@ -38,7 +38,14 @@ output "alb" {
 output "alb_https_listener" {
   value = aws_lb_listener.https
 }
+output "alb_security_group_id" {
+  value = aws_security_group.alb.id
+}
 
 output "redis" {
   value = aws_elasticache_cluster.main
+}
+
+output "ecs_cluster" {
+  value = aws_ecs_cluster.main
 }

@@ -133,10 +133,10 @@ resource "random_id" "outline_util_secret_key" {
   byte_length = 32
 }
 resource "aws_s3_object" "env_file" {
-  bucket = data.terraform_remote_state.cicd.outputs.cicd_bucket_name
-  key = "outline-prod-env"
-  acl = "private"
-  bucket_key_enabled = true
+  bucket                 = data.terraform_remote_state.cicd.outputs.cicd_bucket_name
+  key                    = "outline-prod-env"
+  acl                    = "private"
+  bucket_key_enabled     = true
   server_side_encryption = "aws:kms"
 
   content = <<-EOT

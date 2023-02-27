@@ -3,9 +3,9 @@ resource "tls_private_key" "ssh_key" {
   rsa_bits  = 4096
 }
 resource "aws_secretsmanager_secret" "ssh_key" {
-  name = "${var.name}-ssh-private-key"
+  name                           = "${var.name}-ssh-private-key"
   force_overwrite_replica_secret = true
-  recovery_window_in_days = 0
+  recovery_window_in_days        = 0
 
   tags = var.default_tags
 }
@@ -63,7 +63,7 @@ data "template_file" "cw_agent_setup_script" {
   template = file("${path.module}/setup_cw_agent.sh")
 
   vars = {
-    env = var.env_name
+    env              = var.env_name
     cicd_bucket_name = var.cicd_bucket_name
   }
 }
@@ -98,7 +98,7 @@ resource "aws_launch_template" "main" {
 
   tag_specifications {
     resource_type = "instance"
-    tags = merge({Name = var.name}, var.default_tags)
+    tags          = merge({ Name = var.name }, var.default_tags)
   }
 
   tags = var.default_tags

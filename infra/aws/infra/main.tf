@@ -18,7 +18,7 @@ provider "aws" {
 }
 
 locals {
-  domain_name = "alwiac.com"
+  domain_name          = "alwiac.com"
   bastion_ssh_key_path = "/tmp/bastion_ssh_key"
 }
 
@@ -38,24 +38,24 @@ module "prod" {
 }
 
 resource "local_sensitive_file" "bastion_ssh_private_key" {
-    content = module.prod.bastion_ssh_private_key
-    filename = local.bastion_ssh_key_path
+  content  = module.prod.bastion_ssh_private_key
+  filename = local.bastion_ssh_key_path
 }
 resource "local_sensitive_file" "bastion_ssh_public_key" {
-    content = module.prod.bastion_ssh_public_key
-    filename = "${local.bastion_ssh_key_path}_pub"
+  content  = module.prod.bastion_ssh_public_key
+  filename = "${local.bastion_ssh_key_path}_pub"
 }
 data "template_file" "ssh_tunnel_setup_script" {
-    template = file("${path.module}/../setup_bastion_tunnel.tftpl")
+  template = file("${path.module}/../setup_bastion_tunnel.tftpl")
 
-    vars = {
-        ssh_key_path = local.bastion_ssh_key_path
-        database_host_name = module.prod.database.address
-        # redis_host_name = module.prod.redis
-        bastion_host_ip = module.prod.bastion.public_ip
-    }
+  vars = {
+    ssh_key_path       = local.bastion_ssh_key_path
+    database_host_name = module.prod.database.address
+    # redis_host_name = module.prod.redis
+    bastion_host_ip = module.prod.bastion.public_ip
+  }
 }
 resource "local_file" "setup_bastion_tunnel_script" {
-    content = data.template_file.ssh_tunnel_setup_script.rendered
-    filename = "${path.module}/../setup_bastion_tunnel.sh"
+  content  = data.template_file.ssh_tunnel_setup_script.rendered
+  filename = "${path.module}/../setup_bastion_tunnel.sh"
 }
