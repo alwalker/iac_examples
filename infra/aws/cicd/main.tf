@@ -1,7 +1,7 @@
 terraform {
   backend "s3" {
     region         = "us-east-1"
-    bucket         = "awsiac-devops2"
+    bucket         = "awsiac-devops"
     key            = "terraform-states/cicd"
     dynamodb_table = "terraform-states-cicd" #LockID
   }
@@ -18,7 +18,7 @@ provider "aws" {
 }
 
 locals {
-  cicd_bucket_name = "alwiac-cicd2"
+  cicd_bucket_name = "alwiac-cicd"
 }
 
 resource "aws_kms_key" "bucket_key" {
@@ -89,4 +89,10 @@ resource "aws_iam_role_policy_attachment" "packer" {
 resource "aws_iam_instance_profile" "packer" {
   name = "packer"
   role = aws_iam_role.packer.id
+}
+
+resource "aws_ecr_repository" "outline" {
+  name = "outline"
+
+  force_delete = true
 }

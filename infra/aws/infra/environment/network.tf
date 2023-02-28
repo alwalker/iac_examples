@@ -20,6 +20,7 @@ module "vpc" {
   public_subnets      = local.public_subnets
   elasticache_subnets = local.elasticache_subnets
 
+  enable_nat_gateway = true
   single_nat_gateway = true
 
   enable_dns_hostnames = true

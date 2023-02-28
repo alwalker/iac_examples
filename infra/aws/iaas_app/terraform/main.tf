@@ -1,7 +1,7 @@
 terraform {
   backend "s3" {
     region         = "us-east-1"
-    bucket         = "awsiac-devops2"
+    bucket         = "awsiac-devops"
     key            = "terraform-states/outline-prod"
     dynamodb_table = "terraform-states-outline-prod"
   }
@@ -35,7 +35,7 @@ provider "postgresql" {
 data "terraform_remote_state" "infra" {
   backend = "s3"
   config = {
-    bucket = "awsiac-devops2"
+    bucket = "awsiac-devops"
     key    = "terraform-states/infra"
     region = "us-east-1"
   }
@@ -43,7 +43,7 @@ data "terraform_remote_state" "infra" {
 data "terraform_remote_state" "cicd" {
   backend = "s3"
   config = {
-    bucket = "awsiac-devops2"
+    bucket = "awsiac-devops"
     key    = "terraform-states/cicd"
     region = "us-east-1"
   }

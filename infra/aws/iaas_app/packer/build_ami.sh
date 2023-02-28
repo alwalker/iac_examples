@@ -22,7 +22,7 @@ useradd -c "Outline User" -s /bin/bash -m outline
 #setup configs
 mkdir /opt/configs
 # echo "REPLACE ME" > /opt/configs/env
-aws s3 cp s3://alwiac-cicd2/outline-prod-env /opt/configs/env
+aws s3 cp s3://alwiac-cicd/outline-prod-env /opt/configs/env
 chown -R outline:outline /opt/configs
 
 #create pod

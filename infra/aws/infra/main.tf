@@ -1,7 +1,7 @@
 terraform {
   backend "s3" {
     region         = "us-east-1"
-    bucket         = "awsiac-devops2"
+    bucket         = "awsiac-devops"
     key            = "terraform-states/infra"
     dynamodb_table = "terraform-states-infra" #LockID
   }

@@ -2,26 +2,6 @@ variable "name" {
   type = string
 }
 
-variable "cluster_arn" {
-  type = string
-}
-variable "force_new_deployment" {
-  type    = bool
-  default = false
-}
-variable "target_group_arn" {
-  type = string
-}
-variable "app_port" {
-  type = number
-}
-variable "subnets" {
-  type = list(string)
-}
-variable "security_groups" {
-  type = list(string)
-}
-
 variable "iam_role_arn" {
   type = string
 }
@@ -45,6 +25,35 @@ variable "outline_url" {
 }
 variable "bucket_name" {
   type = string
+}
+variable "cloudwatch_group_name" {
+    type = string
+}
+variable "log_region" {
+    type = string
+}
+variable "execution_role_arn" {
+  type = string
+}
+
+variable "cluster_arn" {
+  type = string
+}
+variable "force_new_deployment" {
+  type    = bool
+  default = false
+}
+variable "target_group_arn" {
+  type = string
+}
+variable "app_port" {
+  type = number
+}
+variable "subnets" {
+  type = list(string)
+}
+variable "security_groups" {
+  type = list(string)
 }
 
 variable "default_tags" {

@@ -1,7 +1,7 @@
 terraform {
   backend "s3" {
     region         = "us-east-1"
-    bucket         = "awsiac-devops2"
+    bucket         = "awsiac-devops"
     key            = "terraform-states/outline-fargate-prod"
     dynamodb_table = "terraform-states-outline-fargate-prod"
   }
@@ -35,7 +35,7 @@ provider "postgresql" {
 data "terraform_remote_state" "infra" {
   backend = "s3"
   config = {
-    bucket = "awsiac-devops2"
+    bucket = "awsiac-devops"
     key    = "terraform-states/infra"
     region = "us-east-1"
   }
@@ -43,7 +43,7 @@ data "terraform_remote_state" "infra" {
 data "terraform_remote_state" "cicd" {
   backend = "s3"
   config = {
-    bucket = "awsiac-devops2"
+    bucket = "awsiac-devops"
     key    = "terraform-states/cicd"
     region = "us-east-1"
   }
@@ -69,7 +69,7 @@ module "alb_endpoint" {
   source = "./alb"
 
   name          = "outline"
-  port          = "6100"
+  port          = local.outline_port
   vpc_id        = data.terraform_remote_state.infra.outputs.prod.vpc.vpc_id
   listener_arn  = data.terraform_remote_state.infra.outputs.prod.alb_https_listener.arn
   priority      = "1000"
@@ -94,13 +94,21 @@ module "security" {
 
   name = "prod-outline"
 
-  app_port                  = 6100
+  app_port                  = local.outline_port
   outline_security_group_id = data.terraform_remote_state.infra.outputs.prod.outline_security_group_id
   alb_security_group_id     = data.terraform_remote_state.infra.outputs.prod.alb_security_group_id
 
   bucket_name = aws_s3_bucket.main.id
 
   default_tags = local.default_tags
+}
+
+resource "aws_cloudwatch_log_group" "main" {
+  name = "outline-prod"
+
+  retention_in_days = 7
+
+  tags = local.default_tags
 }
 
 module "ecs" {
@@ -118,14 +126,17 @@ module "ecs" {
   subnets              = data.terraform_remote_state.infra.outputs.prod.vpc.private_subnets
   security_groups      = [data.terraform_remote_state.infra.outputs.prod.outline_security_group_id]
 
-  iam_role_arn                = module.security.aws_iam_role_arn
-  outline_container_image_uri = "docker.io/outlinewiki/outline:latest"
+  iam_role_arn                = module.security.task_role_arn
+  outline_container_image_uri = "208157287953.dkr.ecr.us-east-1.amazonaws.com/outline:latest"
   database_password           = data.terraform_remote_state.infra.outputs.prod.database_admin_password
   database_username           = data.terraform_remote_state.infra.outputs.prod.database_admin_username
   database_host               = data.terraform_remote_state.infra.outputs.prod.database.address
   redis_host                  = data.terraform_remote_state.infra.outputs.prod.redis.cache_nodes[0].address
   outline_url                 = data.terraform_remote_state.infra.outputs.prod_domain_name
   bucket_name                 = aws_s3_bucket.main.id
+  cloudwatch_group_name       = aws_cloudwatch_log_group.main.name
+  log_region                  = "us-east-1"
+  execution_role_arn = module.security.task_execution_role_arn
 
   default_tags = local.default_tags
 }
