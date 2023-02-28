@@ -140,13 +140,3 @@ module "ecs" {
 
   default_tags = local.default_tags
 }
-
-
-
-# resource "random_password" "database_admin_password" {
-#   length           = 32
-#   lower = false
-#   numeric = true
-#   special = false
-#   upper = false
-# }
