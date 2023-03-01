@@ -10,6 +10,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 4.0"
     }
+    namecheap = {
+      source = "namecheap/namecheap"
+      version = ">= 2.0.0"
+    }
   }
 }
 
@@ -17,8 +21,14 @@ provider "aws" {
   region = "us-east-1"
 }
 
+provider "namecheap" {
+  user_name = "alwalker"
+  api_user = "alwalker"
+  use_sandbox = false
+}
+
 locals {
-  domain_name          = "alwiac.com"
+  domain_name          = "iac-examples.com"
   bastion_ssh_key_path = "/tmp/bastion_ssh_key"
 }
 
@@ -46,12 +56,12 @@ resource "local_sensitive_file" "bastion_ssh_public_key" {
   filename = "${local.bastion_ssh_key_path}_pub"
 }
 data "template_file" "ssh_tunnel_setup_script" {
-  template = file("${path.module}/../setup_bastion_tunnel.tftpl")
+  template = file("${path.module}/../../setup_bastion_tunnel.tftpl")
 
   vars = {
     ssh_key_path       = local.bastion_ssh_key_path
     database_host_name = module.prod.database.address
-    # redis_host_name = module.prod.redis
+    redis_host_name = module.prod.redis.cache_nodes[0].address
     bastion_host_ip = module.prod.bastion.public_ip
   }
 }

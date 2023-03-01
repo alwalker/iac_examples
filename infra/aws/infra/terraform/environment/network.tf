@@ -1,3 +1,12 @@
+terraform {
+  required_providers {
+    namecheap = {
+      source = "namecheap/namecheap"
+      version = ">= 2.0.0"
+    }
+  }
+}
+
 locals {
   num_azs = length(var.vpc_availability_zones)
 
@@ -31,4 +40,10 @@ module "vpc" {
 
 resource "aws_route53_zone" "main" {
   name = var.domain_name
+}
+resource "namecheap_domain_records" "nameservers" {
+  domain = var.domain_name
+  mode = "OVERWRITE"
+
+  nameservers = aws_route53_zone.main.name_servers
 }

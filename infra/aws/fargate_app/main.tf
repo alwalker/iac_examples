@@ -73,9 +73,9 @@ module "alb_endpoint" {
   vpc_id        = data.terraform_remote_state.infra.outputs.prod.vpc.vpc_id
   listener_arn  = data.terraform_remote_state.infra.outputs.prod.alb_https_listener.arn
   priority      = "1000"
-  host_headers  = ["outline.${data.terraform_remote_state.infra.outputs.prod_domain_name}"]
+  host_headers  = ["outline-prod.${data.terraform_remote_state.infra.outputs.prod_domain_name}"]
   hostedzone_id = data.terraform_remote_state.infra.outputs.prod.dns_zone.zone_id
-  dns_name      = "outline"
+  dns_name      = "outline-prod"
   alb_dns_name  = data.terraform_remote_state.infra.outputs.prod.alb.dns_name
   alb_dns_zone  = data.terraform_remote_state.infra.outputs.prod.alb.zone_id
   default_tags  = local.default_tags
@@ -127,12 +127,12 @@ module "ecs" {
   security_groups      = [data.terraform_remote_state.infra.outputs.prod.outline_security_group_id]
 
   iam_role_arn                = module.security.task_role_arn
-  outline_container_image_uri = "208157287953.dkr.ecr.us-east-1.amazonaws.com/outline:latest"
-  database_password           = data.terraform_remote_state.infra.outputs.prod.database_admin_password
-  database_username           = data.terraform_remote_state.infra.outputs.prod.database_admin_username
+  outline_container_image_uri = "416496057868.dkr.ecr.us-east-1.amazonaws.com/outline"
+  database_password           = module.database.password
+  database_username           = module.database.username
   database_host               = data.terraform_remote_state.infra.outputs.prod.database.address
   redis_host                  = data.terraform_remote_state.infra.outputs.prod.redis.cache_nodes[0].address
-  outline_url                 = data.terraform_remote_state.infra.outputs.prod_domain_name
+  outline_url                 = "https://outline-prod.${data.terraform_remote_state.infra.outputs.prod_domain_name}"
   bucket_name                 = aws_s3_bucket.main.id
   cloudwatch_group_name       = aws_cloudwatch_log_group.main.name
   log_region                  = "us-east-1"

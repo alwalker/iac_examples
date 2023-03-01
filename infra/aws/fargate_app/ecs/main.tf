@@ -13,7 +13,7 @@ locals {
     { name = "DATABASE_CONNECTION_POOL_MIN", value = "1" },
     { name = "DATABASE_CONNECTION_POOL_MAX", value = "5" },
     { name = "REDIS_URL", value = "redis://${var.redis_host}" },
-    { name = "URL", value = "https://outline.${var.outline_url}" },
+    { name = "URL", value = "${var.outline_url}" },
     { name = "PORT", value = tostring(var.app_port) },
     { name = "FORCE_HTTPS", value = "false" },
     { name = "AWS_S3_UPLOAD_BUCKET_NAME", value = var.bucket_name }

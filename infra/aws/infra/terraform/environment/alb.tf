@@ -1,35 +1,29 @@
-resource "tls_private_key" "alb_cert_private_key" {
-  count = var.cert_arn == "" ? 1 : 0
+resource "aws_acm_certificate" "main" {
+  domain_name       = var.domain_name
+  subject_alternative_names = ["*.${var.domain_name}"]
+  validation_method = "DNS"
 
-  algorithm = "RSA"
+  tags = var.default_tags
 }
-resource "tls_self_signed_cert" "alb_cert" {
-  count = var.cert_arn == "" ? 1 : 0
-
-  private_key_pem = tls_private_key.alb_cert_private_key[0].private_key_pem
-  dns_names = [
-    var.domain_name,
-    "*.${var.domain_name}"
-  ]
-
-  subject {
-    common_name  = var.domain_name
-    organization = "ALW Examples, Inc"
+resource "aws_route53_record" "dns_validation" {
+  for_each = {
+    for dvo in aws_acm_certificate.main.domain_validation_options : dvo.domain_name => {
+      name   = dvo.resource_record_name
+      record = dvo.resource_record_value
+      type   = dvo.resource_record_type
+    }
   }
 
-  validity_period_hours = 12
-
-  allowed_uses = [
-    "key_encipherment",
-    "digital_signature",
-    "server_auth",
-  ]
+  allow_overwrite = true
+  name            = each.value.name
+  records         = [each.value.record]
+  ttl             = 60
+  type            = each.value.type
+  zone_id         = aws_route53_zone.main.zone_id
 }
-resource "aws_acm_certificate" "alb_cert" {
-  count = var.cert_arn == "" ? 1 : 0
-
-  private_key      = tls_private_key.alb_cert_private_key[0].private_key_pem
-  certificate_body = tls_self_signed_cert.alb_cert[0].cert_pem
+resource "aws_acm_certificate_validation" "main" {
+  certificate_arn         = aws_acm_certificate.main.arn
+  validation_record_fqdns = [for record in aws_route53_record.dns_validation : record.fqdn]
 }
 
 resource "aws_security_group" "alb" {
@@ -75,7 +69,7 @@ resource "aws_lb_listener" "https" {
   load_balancer_arn = aws_lb.main.arn
   port              = 443
   protocol          = "HTTPS"
-  certificate_arn   = var.cert_arn == "" ? aws_acm_certificate.alb_cert[0].arn : var.cert_arn
+  certificate_arn   = aws_acm_certificate.main.arn
   default_action {
     type = "fixed-response"
 

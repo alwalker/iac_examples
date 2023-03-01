@@ -91,11 +91,6 @@ variable "app_port" {
   type = string
 }
 
-variable "cert_arn" {
-  type    = string
-  default = ""
-}
-
 variable "default_tags" {
   type = map(any)
 }

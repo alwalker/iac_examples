@@ -8,7 +8,7 @@ terraform {
 
 resource "random_password" "main" {
   length           = 32
-  override_special = "!@%*()-_=+[]{}:?"
+  special = false
 }
 resource "aws_secretsmanager_secret" "password" {
   name                           = "database-${var.name}-password"
