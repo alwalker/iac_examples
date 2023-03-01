@@ -127,7 +127,7 @@ module "ecs" {
   security_groups      = [data.terraform_remote_state.infra.outputs.prod.outline_security_group_id]
 
   iam_role_arn                = module.security.task_role_arn
-  outline_container_image_uri = "416496057868.dkr.ecr.us-east-1.amazonaws.com/outline"
+  outline_container_image_uri = data.terraform_remote_state.cicd.outputs.outline_ecr_uri
   database_password           = module.database.password
   database_username           = module.database.username
   database_host               = data.terraform_remote_state.infra.outputs.prod.database.address

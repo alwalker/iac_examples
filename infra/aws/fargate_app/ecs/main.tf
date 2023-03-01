@@ -35,7 +35,7 @@ resource "aws_ecs_task_definition" "migrations" {
       image       = var.outline_container_image_uri
       command     = ["yarn", "db:migrate"]
       environment = local.env_vars
-      essential = true
+      essential   = true
       logConfiguration = {
         logDriver = "awslogs"
         options = {
@@ -48,14 +48,20 @@ resource "aws_ecs_task_definition" "migrations" {
   ])
 }
 resource "aws_ecs_service" "migrations" {
+  lifecycle {
+    ignore_changes = [
+      desired_count
+    ]
+  }
+
   name = "${var.name}-migrations"
 
-  cluster                            = var.cluster_arn
-  enable_execute_command             = true
-  force_new_deployment               = var.force_new_deployment
-  launch_type                        = "FARGATE"
-  propagate_tags                     = "SERVICE"
-  task_definition                    = "${var.name}-migrations:${aws_ecs_task_definition.migrations.revision}"
+  cluster                = var.cluster_arn
+  enable_execute_command = true
+  force_new_deployment   = var.force_new_deployment
+  launch_type            = "FARGATE"
+  propagate_tags         = "SERVICE"
+  task_definition        = "${var.name}-migrations:${aws_ecs_task_definition.migrations.revision}"
 
   network_configuration {
     subnets          = var.subnets
