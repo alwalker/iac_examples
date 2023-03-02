@@ -41,6 +41,9 @@ output "alb_https_listener" {
 output "alb_security_group_id" {
   value = aws_security_group.alb.id
 }
+output "acm_cert_arn" {
+  value = aws_acm_certificate.main.arn
+}
 
 output "redis" {
   value = aws_elasticache_cluster.main

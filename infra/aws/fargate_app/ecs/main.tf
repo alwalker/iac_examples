@@ -16,60 +16,14 @@ locals {
     { name = "URL", value = "${var.outline_url}" },
     { name = "PORT", value = tostring(var.app_port) },
     { name = "FORCE_HTTPS", value = "false" },
-    { name = "AWS_S3_UPLOAD_BUCKET_NAME", value = var.bucket_name }
+    { name = "AWS_S3_UPLOAD_BUCKET_NAME", value = var.bucket_name },
+    { name = "OIDC_CLIENT_ID", value = var.oidc_client_id },
+    { name = "OIDC_CLIENT_SECRET", value = var.oidc_client_secret },
+    { name = "OIDC_AUTH_URI", value = var.oidc_auth_url },
+    { name = "OIDC_TOKEN_URI", value = var.oidc_token_uri },
+    { name = "OIDC_USERINFO_URI", value = var.oidc_userinfo_uri },
+    { name = "OIDC_USERNAME_CLAIM", value = "email" }
   ]
-}
-
-resource "aws_ecs_task_definition" "migrations" {
-  family                   = "${var.name}-migrations"
-  cpu                      = 1024
-  memory                   = 2048
-  network_mode             = "awsvpc"
-  requires_compatibilities = ["FARGATE"]
-  task_role_arn            = var.iam_role_arn
-  execution_role_arn       = var.execution_role_arn
-
-  container_definitions = jsonencode([
-    {
-      name        = "${var.name}-migrations"
-      image       = var.outline_container_image_uri
-      command     = ["yarn", "db:migrate"]
-      environment = local.env_vars
-      essential   = true
-      logConfiguration = {
-        logDriver = "awslogs"
-        options = {
-          awslogs-group         = var.cloudwatch_group_name
-          awslogs-region        = var.log_region
-          awslogs-stream-prefix = "${var.name}-migrations"
-        }
-      }
-    }
-  ])
-}
-resource "aws_ecs_service" "migrations" {
-  lifecycle {
-    ignore_changes = [
-      desired_count
-    ]
-  }
-
-  name = "${var.name}-migrations"
-
-  cluster                = var.cluster_arn
-  enable_execute_command = true
-  force_new_deployment   = var.force_new_deployment
-  launch_type            = "FARGATE"
-  propagate_tags         = "SERVICE"
-  task_definition        = "${var.name}-migrations:${aws_ecs_task_definition.migrations.revision}"
-
-  network_configuration {
-    subnets          = var.subnets
-    security_groups  = var.security_groups
-    assign_public_ip = false
-  }
-
-  tags = var.default_tags
 }
 
 resource "aws_ecs_task_definition" "main" {
@@ -85,6 +39,8 @@ resource "aws_ecs_task_definition" "main" {
     {
       name      = var.name
       image     = var.outline_container_image_uri
+      entryPoint = ["/bin/sh", "-c"]
+      command   = ["yarn db:migrate && yarn start"]
       cpu       = 1024
       memory    = 2048
       essential = true
