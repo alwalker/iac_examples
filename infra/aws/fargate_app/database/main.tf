@@ -7,7 +7,7 @@ terraform {
 }
 
 resource "random_password" "main" {
-  length           = 32
+  length  = 32
   special = false
 }
 resource "aws_secretsmanager_secret" "password" {

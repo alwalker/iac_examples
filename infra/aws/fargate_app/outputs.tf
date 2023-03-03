@@ -3,15 +3,15 @@ output "alb_endpoint" {
 }
 output "database" {
   sensitive = true
-  value = module.database
+  value     = module.database
 }
 output "security" {
   sensitive = true
-  value = module.security
+  value     = module.security
 }
 output "cognito" {
   sensitive = true
-  value = module.cognito
+  value     = module.cognito
 }
 output "ecs" {
   value = module.ecs

@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     namecheap = {
-      source = "namecheap/namecheap"
+      source  = "namecheap/namecheap"
       version = ">= 2.0.0"
     }
   }
@@ -50,7 +50,7 @@ resource "aws_route53_record" "root" {
 }
 resource "namecheap_domain_records" "nameservers" {
   domain = var.domain_name
-  mode = "OVERWRITE"
+  mode   = "OVERWRITE"
 
   nameservers = aws_route53_zone.main.name_servers
 }

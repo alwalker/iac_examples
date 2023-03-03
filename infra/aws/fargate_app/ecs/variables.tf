@@ -30,22 +30,22 @@ variable "oidc_client_id" {
   type = string
 }
 variable "oidc_client_secret" {
-    type = string
+  type = string
 }
 variable "oidc_auth_url" {
-    type = string
+  type = string
 }
 variable "oidc_token_uri" {
-    type = string
+  type = string
 }
 variable "oidc_userinfo_uri" {
-    type = string
+  type = string
 }
 variable "cloudwatch_group_name" {
-    type = string
+  type = string
 }
 variable "log_region" {
-    type = string
+  type = string
 }
 variable "execution_role_arn" {
   type = string

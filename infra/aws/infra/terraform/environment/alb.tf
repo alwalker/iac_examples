@@ -1,7 +1,7 @@
 resource "aws_acm_certificate" "main" {
-  domain_name       = var.domain_name
+  domain_name               = var.domain_name
   subject_alternative_names = ["*.${var.domain_name}"]
-  validation_method = "DNS"
+  validation_method         = "DNS"
 
   tags = var.default_tags
 }
@@ -25,7 +25,7 @@ resource "aws_acm_certificate_validation" "main" {
   depends_on = [
     namecheap_domain_records.nameservers
   ]
-  
+
   certificate_arn         = aws_acm_certificate.main.arn
   validation_record_fqdns = [for record in aws_route53_record.dns_validation : record.fqdn]
 }

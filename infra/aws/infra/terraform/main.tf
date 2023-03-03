@@ -11,7 +11,7 @@ terraform {
       version = "~> 4.0"
     }
     namecheap = {
-      source = "namecheap/namecheap"
+      source  = "namecheap/namecheap"
       version = ">= 2.0.0"
     }
   }
@@ -22,8 +22,8 @@ provider "aws" {
 }
 
 provider "namecheap" {
-  user_name = "alwalker"
-  api_user = "alwalker"
+  user_name   = "alwalker"
+  api_user    = "alwalker"
   use_sandbox = false
 }
 
@@ -61,8 +61,8 @@ data "template_file" "ssh_tunnel_setup_script" {
   vars = {
     ssh_key_path       = local.bastion_ssh_key_path
     database_host_name = module.prod.database.address
-    redis_host_name = module.prod.redis.cache_nodes[0].address
-    bastion_host_ip = module.prod.bastion.public_ip
+    redis_host_name    = module.prod.redis.cache_nodes[0].address
+    bastion_host_ip    = module.prod.bastion.public_ip
   }
 }
 resource "local_file" "setup_bastion_tunnel_script" {
