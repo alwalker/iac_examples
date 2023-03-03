@@ -10,12 +10,18 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 4.0"
     }
+    github = {
+      source  = "integrations/github"
+      version = "~> 5.0"
+    }
   }
 }
 
 provider "aws" {
   region = "us-east-1"
 }
+
+provider "github" {}
 
 locals {
   cicd_bucket_name = "alwiac-cicd"
@@ -89,10 +95,4 @@ resource "aws_iam_role_policy_attachment" "packer" {
 resource "aws_iam_instance_profile" "packer" {
   name = "packer"
   role = aws_iam_role.packer.id
-}
-
-resource "aws_ecr_repository" "outline" {
-  name = "outline"
-
-  force_delete = true
 }
