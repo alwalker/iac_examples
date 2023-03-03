@@ -22,6 +22,10 @@ resource "aws_route53_record" "dns_validation" {
   zone_id         = aws_route53_zone.main.zone_id
 }
 resource "aws_acm_certificate_validation" "main" {
+  depends_on = [
+    namecheap_domain_records.nameservers
+  ]
+  
   certificate_arn         = aws_acm_certificate.main.arn
   validation_record_fqdns = [for record in aws_route53_record.dns_validation : record.fqdn]
 }
