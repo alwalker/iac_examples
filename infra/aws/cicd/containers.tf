@@ -30,6 +30,13 @@ resource "aws_iam_user_policy" "cicd_containers" {
   user   = aws_iam_user.cicd_containers.name
   policy = data.aws_iam_policy_document.cicd_containers.json
 }
+data "aws_iam_policy" "task_execution" {
+  name = "AmazonECSTaskExecutionRolePolicy"
+}
+resource "aws_iam_user_policy_attachment" "task_execution" {
+  user       = aws_iam_user.cicd_containers.name
+  policy_arn = data.aws_iam_policy.task_execution.arn
+}
 
 resource "github_actions_secret" "aws_access_key" {
   repository = "iac_examples"

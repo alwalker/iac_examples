@@ -1,0 +1,17 @@
+name: Run Database Migrations
+on:
+  workflow_dispatch:
+jobs:
+  push-to-ecr:
+    name: Run Database Migrations
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          aws ecs run-task \
+            --network-configuration 'awsvpcConfiguration={subnets=["subnet-089ea6064d4a8d5bc","subnet-0cd4d9ad26ee355b3","subnet-06c7b0ab53b3d5681","subnet-03fb97707aa5d647b","subnet-045fad8408bbd9eea","subnet-0bd6199bad910ca5f"],securityGroups=["sg-013b780d339c0bdbe"],assignPublicIp=DISABLED}' \
+            --cluster arn:aws:ecs:us-east-1:977994766438:cluster/prod \
+            --task-definition outline-migrations:1
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-east-1

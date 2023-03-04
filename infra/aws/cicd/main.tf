@@ -48,15 +48,6 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "main" {
   }
 }
 
-# resource "aws_iam_user" "cicd_runner" {
-#   name = "cicd"
-#   path = "/"
-# }
-# resource "aws_iam_user_policy_attachment" "gitlab" {
-#   user = aws_iam_user.gitlab.name
-#   policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
-# }
-
 resource "aws_iam_role" "packer" {
   name        = "packer"
   description = "Allows EC2 tasks to do the things"

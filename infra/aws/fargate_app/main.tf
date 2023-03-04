@@ -157,6 +157,7 @@ module "ecs" {
   cloudwatch_group_name       = aws_cloudwatch_log_group.main.name
   log_region                  = "us-east-1"
   execution_role_arn          = module.security.task_execution_role_arn
+  cicd_username               = data.terraform_remote_state.cicd.outputs.cicd_containers_username
 
   default_tags = local.default_tags
 }

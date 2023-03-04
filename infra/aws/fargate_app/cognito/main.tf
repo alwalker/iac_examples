@@ -1,4 +1,11 @@
 resource "aws_cognito_user_pool" "main" {
+  lifecycle {
+    ignore_changes = [
+      custom_domain,
+      domain
+    ]
+  }
+
   name = var.name
 
   username_attributes      = ["email"]

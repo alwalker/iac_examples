@@ -71,6 +71,10 @@ variable "security_groups" {
   type = list(string)
 }
 
+variable "cicd_username" {
+  type = string
+}
+
 variable "default_tags" {
   type = map(any)
 }
