@@ -1,11 +1,12 @@
-resource "aws_cognito_user_pool" "main" {
-  lifecycle {
-    ignore_changes = [
-      custom_domain,
-      domain
-    ]
+terraform {
+  required_providers {
+    shell = {
+      source = "scottwinkler/shell"
+    }
   }
+}
 
+resource "aws_cognito_user_pool" "main" {
   name = var.name
 
   username_attributes      = ["email"]
@@ -97,4 +98,12 @@ resource "aws_cognito_user_pool_client" "main" {
   allowed_oauth_flows                  = ["code", "implicit"]
   allowed_oauth_scopes                 = ["email", "openid", "profile"]
   supported_identity_providers         = ["COGNITO"]
+}
+
+data "shell_script" "oauth_info" {
+  lifecycle_commands {
+    read = <<-EOF
+    curl -s https://${aws_cognito_user_pool.main.endpoint}/.well-known/openid-configuration
+    EOF
+  }
 }

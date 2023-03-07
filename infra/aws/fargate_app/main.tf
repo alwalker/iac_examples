@@ -14,6 +14,9 @@ terraform {
       source  = "cyrilgdn/postgresql"
       version = "~> 1.18.0"
     }
+    shell = {
+      source = "scottwinkler/shell"
+    }
   }
 }
 
@@ -151,9 +154,9 @@ module "ecs" {
   bucket_name                 = aws_s3_bucket.main.id
   oidc_client_id              = module.cognito.client.id
   oidc_client_secret          = module.cognito.client.client_secret
-  oidc_auth_url               = "${local.oidc_url}/oauth2/authorize"
-  oidc_token_uri              = "${local.oidc_url}/oauth2/token"
-  oidc_userinfo_uri           = "${local.oidc_url}/oauth2/userInfo"
+  oidc_auth_url               = module.cognito.oauth_info["authorization_endpoint"]
+  oidc_token_uri              = module.cognito.oauth_info["token_endpoint"]
+  oidc_userinfo_uri           = module.cognito.oauth_info["userinfo_endpoint"]
   cloudwatch_group_name       = aws_cloudwatch_log_group.main.name
   log_region                  = "us-east-1"
   execution_role_arn          = module.security.task_execution_role_arn
