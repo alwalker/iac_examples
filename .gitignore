@@ -33,4 +33,4 @@ override.tf.json
 .terraformrc
 terraform.rc
 
-infra/aws/infra/setup_bastion_tunnel.sh
+ops/aws_setup_bastion_tunnel.sh

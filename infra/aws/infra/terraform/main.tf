@@ -67,5 +67,5 @@ data "template_file" "ssh_tunnel_setup_script" {
 }
 resource "local_file" "setup_bastion_tunnel_script" {
   content  = data.template_file.ssh_tunnel_setup_script.rendered
-  filename = "${path.module}/../setup_bastion_tunnel.sh"
+  filename = "${path.root}/../../../../ops/aws_setup_bastion_tunnel.sh"
 }
