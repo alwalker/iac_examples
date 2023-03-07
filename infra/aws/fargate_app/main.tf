@@ -71,10 +71,11 @@ resource "aws_s3_bucket_acl" "main" {
 }
 
 module "alb_endpoint" {
-  source = "./alb"
+  source = "../terraform_modules/alb"
 
   name          = "outline"
   port          = local.outline_port
+  target_type   = "ip"
   vpc_id        = data.terraform_remote_state.infra.outputs.prod.vpc.vpc_id
   listener_arn  = data.terraform_remote_state.infra.outputs.prod.alb_https_listener.arn
   priority      = "1000"
@@ -87,7 +88,7 @@ module "alb_endpoint" {
 }
 
 module "database" {
-  source = "./database"
+  source = "../terraform_modules/database"
 
   name = "outline"
 
@@ -117,7 +118,7 @@ resource "aws_cloudwatch_log_group" "main" {
 }
 
 module "cognito" {
-  source = "./cognito"
+  source = "../terraform_modules/cognito"
 
   name = "outline-prod"
 
