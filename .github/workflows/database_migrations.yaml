@@ -8,8 +8,8 @@ jobs:
     steps:
       - run: |
           aws ecs run-task \
-            --network-configuration 'awsvpcConfiguration={subnets=["subnet-089ea6064d4a8d5bc","subnet-0cd4d9ad26ee355b3","subnet-06c7b0ab53b3d5681","subnet-03fb97707aa5d647b","subnet-045fad8408bbd9eea","subnet-0bd6199bad910ca5f"],securityGroups=["sg-013b780d339c0bdbe"],assignPublicIp=DISABLED}' \
-            --cluster arn:aws:ecs:us-east-1:977994766438:cluster/prod \
+            --network-configuration 'awsvpcConfiguration={subnets=["subnet-01789cc05fce856d7","subnet-06f6b115670f84dde","subnet-0a5fc02992eeb827d","subnet-04b2c16f04f2d4ee1","subnet-06c6f8e240f50068b","subnet-0f4c916b0d8f2e705"],securityGroups=["sg-016cfb507877021b7"],assignPublicIp=DISABLED}' \
+            --cluster arn:aws:ecs:us-east-1:928151643990:cluster/prod \
             --task-definition outline-migrations:1
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}

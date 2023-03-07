@@ -32,5 +32,8 @@ You should now be able to go to the domain name specified in the config and logi
 ## A Note On Naming and Modules
 While Outline and its required dependencies are the only things provisioned here I've tried to structure and name things such that they would be part of a team or organizational unit's larger infrastructure. For example Outline could be one of many tools deployed in a documentation team's Amazon account; or part of many things in a shared "devops" subscription in Azure. To that end the things under `/infra/[provider]` are name very generically and meant to represent what an infrastructure group or lone devops engineer might write. While what is in the specific hosting examples is what would live the actual application's repository. 
 
+## A Note on CICD
+The `cicd` sections of each provider here are largely not a reflection of how I approach CICD. They are simply tasks that are easily generated and better done somewhere besides my computer. 
+
 ## Track Progress
 Check out the [Trello board](https://trello.com/b/9fzihbj7/iac-examples) for a roadmap and current progress.
