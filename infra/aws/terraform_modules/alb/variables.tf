@@ -4,6 +4,9 @@ variable "name" {
 variable "port" {
   type = string
 }
+variable "target_type" {
+  type = string
+}
 variable "vpc_id" {
   type = string
 }
