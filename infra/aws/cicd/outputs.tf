@@ -5,6 +5,9 @@ output "cicd_bucket_name" {
 output "outline_ecr_uri" {
   value = aws_ecr_repository.outline.repository_url
 }
+output "outline_ecr_arn" {
+  value = aws_ecr_repository.outline.arn
+}
 output "cicd_containers_username" {
   value = aws_iam_user.cicd_containers.name
 }

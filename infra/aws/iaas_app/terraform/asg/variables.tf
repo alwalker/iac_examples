@@ -2,9 +2,6 @@ variable "name" {
   type = string
 }
 
-variable "aminame" {
-  type = string
-}
 
 variable "env_name" {
   type = string
@@ -55,11 +52,45 @@ variable "asg_cpu_min_threshold" {
 variable "default_tags" {
   type = map(any)
 }
-
-
-
-
-
-# variable "cw_kms_key_id" {
-#   type = string
-# }
+variable "outline_container_image_uri" {
+  type = string
+}
+variable "outline_registry_domain" {
+  type = string
+}
+variable "port" {
+  type = number
+}
+variable "database_username" {
+  type = string
+}
+variable "database_password" {
+  type = string
+}
+variable "database_host" {
+  type = string
+}
+variable "redis_host" {
+  type = string
+}
+variable "outline_url" {
+  type = string
+}
+variable "bucket_name" {
+  type = string
+}
+variable "oidc_client_id" {
+  type = string
+}
+variable "oidc_client_secret" {
+  type = string
+}
+variable "oidc_auth_url" {
+  type = string
+}
+variable "oidc_token_uri" {
+  type = string
+}
+variable "oidc_userinfo_uri" {
+  type = string
+}
