@@ -20,23 +20,10 @@ resource "aws_security_group" "bastion" {
   tags = var.default_tags
 }
 
-resource "tls_private_key" "bastion_ssh_key" {
-  algorithm = "ED25519"
-}
-resource "aws_secretsmanager_secret" "bastion_ssh_private_key" {
-  name                           = "bastion-ssh-private-key"
-  force_overwrite_replica_secret = true
-  recovery_window_in_days        = 0
+module "bastion_ssh_key" {
+  source = "../../../terraform_modules/ssh_key_pair_with_secret"
 
-  tags = var.default_tags
-}
-resource "aws_secretsmanager_secret_version" "bastion_ssh_private_key" {
-  secret_id     = aws_secretsmanager_secret.bastion_ssh_private_key.id
-  secret_string = tls_private_key.bastion_ssh_key.private_key_openssh
-}
-resource "aws_key_pair" "bastion" {
-  key_name   = "${var.env_name}-bastion-key"
-  public_key = trimspace(tls_private_key.bastion_ssh_key.public_key_openssh)
+  name = "${var.env_name}-bastion"
 
   tags = var.default_tags
 }
@@ -65,11 +52,14 @@ resource "aws_instance" "bastion" {
   instance_type               = "t3a.medium"
   vpc_security_group_ids      = [aws_security_group.bastion.id]
   subnet_id                   = module.vpc.public_subnets[0]
-  key_name                    = aws_key_pair.bastion.key_name
+  key_name                    = module.bastion_ssh_key.aws_key_pair.key_name
   associate_public_ip_address = true
+  user_data_replace_on_change = true
   user_data                   = <<-EOT
   #!/usr/bin/bash -xe
-  dnf install -y atop screen postgresql tree nc bind-utils curl wget lsof zip unzip
+  dnf config-manager --set-enabled crb
+  dnf install -y epel-release epel-next-release
+  dnf install -y podman vim atop screen postgresql tree nc bind-utils curl wget lsof zip unzip
   EOT
 
   root_block_device {

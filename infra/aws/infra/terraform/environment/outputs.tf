@@ -16,10 +16,10 @@ output "database_admin_password" {
 }
 
 output "bastion_ssh_private_key" {
-  value = tls_private_key.bastion_ssh_key.private_key_openssh
+  value = module.bastion_ssh_key.key.private_key_openssh
 }
 output "bastion_ssh_public_key" {
-  value = tls_private_key.bastion_ssh_key.public_key_openssh
+  value = module.bastion_ssh_key.key.public_key_openssh
 }
 output "bastion" {
   value = aws_instance.bastion

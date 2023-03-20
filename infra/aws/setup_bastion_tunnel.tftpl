@@ -1,3 +1,5 @@
+rm -f /root/.ssh/known_hosts
+
 echo "127.0.0.1 ${database_host_name}" >> /etc/hosts
 echo "127.0.0.1 ${redis_host_name}" >> /etc/hosts
 
@@ -5,4 +7,4 @@ ssh -N -v \
     -i ${ssh_key_path} \
     -L 5432:${database_host_name}:5432 \
     -L 6379:${redis_host_name}:6379 \
-    centos@${bastion_host_ip}
+    ec2-user@prod-bastion.iac-examples.com

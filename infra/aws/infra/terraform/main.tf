@@ -36,7 +36,7 @@ module "prod" {
   source = "./environment"
 
   env_name                = "prod"
-  centos_stream_version   = "8"
+  centos_stream_version   = "9"
   domain_name             = local.domain_name
   database_admin_username = "acmeadmin"
   app_port                = "6100"
