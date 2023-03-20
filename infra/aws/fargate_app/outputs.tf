@@ -9,10 +9,6 @@ output "security" {
   sensitive = true
   value     = module.security
 }
-output "cognito" {
-  sensitive = true
-  value     = module.cognito
-}
 output "ecs" {
   value = module.ecs
 }

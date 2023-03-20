@@ -12,7 +12,3 @@ variable "certificate_arn" {
 variable "dns_zone_id" {
   type = string
 }
-
-variable "callback_urls" {
-  type = list(string)
-}

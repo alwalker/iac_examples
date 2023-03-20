@@ -117,15 +117,11 @@ resource "aws_cloudwatch_log_group" "main" {
   tags = local.default_tags
 }
 
-module "cognito" {
-  source = "../terraform_modules/cognito"
+module "cognito_client" {
+  source = "../terraform_modules/cognito_client"
 
   name = "outline-prod"
-
-  certificate_arn  = data.terraform_remote_state.infra.outputs.prod.acm_cert_arn
-  base_domain_name = data.terraform_remote_state.infra.outputs.prod_domain_name
-
-  dns_zone_id = data.terraform_remote_state.infra.outputs.prod.dns_zone.id
+  cognito_pool_id = data.terraform_remote_state.infra.outputs.prod.cognito.user_pool.id
 
   callback_urls = ["${local.dns_name}/auth/oidc.callback"]
 }
@@ -153,11 +149,11 @@ module "ecs" {
   redis_host                  = data.terraform_remote_state.infra.outputs.prod.redis.cache_nodes[0].address
   outline_url                 = local.dns_name
   bucket_name                 = aws_s3_bucket.main.id
-  oidc_client_id              = module.cognito.client.id
-  oidc_client_secret          = module.cognito.client.client_secret
-  oidc_auth_url               = module.cognito.oauth_info["authorization_endpoint"]
-  oidc_token_uri              = module.cognito.oauth_info["token_endpoint"]
-  oidc_userinfo_uri           = module.cognito.oauth_info["userinfo_endpoint"]
+  oidc_client_id              = module.cognito_client.self.id
+  oidc_client_secret          = module.cognito_client.self.client_secret
+  oidc_auth_url               = data.terraform_remote_state.infra.outputs.prod.cognito.oauth_info["authorization_endpoint"]
+  oidc_token_uri              = data.terraform_remote_state.infra.outputs.prod.cognito.oauth_info["token_endpoint"]
+  oidc_userinfo_uri           = data.terraform_remote_state.infra.outputs.prod.cognito.oauth_info["userinfo_endpoint"]
   cloudwatch_group_name       = aws_cloudwatch_log_group.main.name
   log_region                  = "us-east-1"
   execution_role_arn          = module.security.task_execution_role_arn

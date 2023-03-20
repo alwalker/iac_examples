@@ -45,6 +45,10 @@ output "acm_cert_arn" {
   value = aws_acm_certificate.main.arn
 }
 
+output "cognito" {
+  value = module.cognito
+}
+
 output "redis" {
   value = aws_elasticache_cluster.main
 }
