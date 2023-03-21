@@ -1,5 +1,22 @@
+resource "null_resource" "wait_for_dns" {
+  depends_on = [
+    aws_route53_record.root
+  ]
+
+  provisioner "local-exec" {
+    interpreter = ["/usr/bin/bash"]
+    environment = {
+      ROOT_RECORD = var.domain_name
+    }
+    command = "${path.module}/wait-for-dns.sh"
+  }
+}
+
 module "cognito" {
   source = "../../../terraform_modules/cognito"
+  depends_on = [
+    null_resource.wait_for_dns
+  ]
 
   name = "outline"
 

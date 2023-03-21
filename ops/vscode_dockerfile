@@ -25,6 +25,7 @@ RUN dnf install -y --refresh \
     ansible \
     jq \
     lsof \
+    bind-utils \
     && dnf clean all
 
 #Minio
