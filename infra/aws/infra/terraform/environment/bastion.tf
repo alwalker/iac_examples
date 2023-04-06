@@ -28,27 +28,36 @@ module "bastion_ssh_key" {
   tags = var.default_tags
 }
 
-data "aws_ami" "centos-stream" {
-  most_recent = true
+# data "aws_ami" "centos-stream" {
+#   most_recent = true
 
-  filter {
-    name   = "name"
-    values = ["CentOS Stream ${var.centos_stream_version}*"]
-  }
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
-  filter {
-    name   = "architecture"
-    values = ["x86_64"]
-  }
+#   filter {
+#     name   = "name"
+#     values = ["CentOS Stream ${var.centos_stream_version}*"]
+#   }
+#   filter {
+#     name   = "virtualization-type"
+#     values = ["hvm"]
+#   }
+#   filter {
+#     name   = "architecture"
+#     values = ["x86_64"]
+#   }
 
-  owners = ["125523088429"]
+#   owners = ["125523088429"]
+# }
+
+data "aws_region" "current" {}
+module "bastion_ami" {
+  source = "../../../terraform_modules/centos_ami"
+
+  region = data.aws_region.current.name
+  centos_version_number = 9
 }
 
+
 resource "aws_instance" "bastion" {
-  ami                         = data.aws_ami.centos-stream.id
+  ami                         = module.bastion_ami.id #data.aws_ami.centos-stream.id
   instance_type               = "t3a.medium"
   vpc_security_group_ids      = [aws_security_group.bastion.id]
   subnet_id                   = module.vpc.public_subnets[0]
