@@ -8,10 +8,10 @@ resource "aws_lb_target_group" "main" {
 
   health_check {
     healthy_threshold   = "2"
-    unhealthy_threshold = "3"
-    timeout             = "10"
+    unhealthy_threshold = "4"
+    timeout             = "5"
     path                = "/"
-    interval            = "30"
+    interval            = "15"
   }
 
   tags = var.default_tags

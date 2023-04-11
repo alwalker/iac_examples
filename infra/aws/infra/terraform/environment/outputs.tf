@@ -27,6 +27,9 @@ output "bastion" {
 output "bastion_dns_name" {
   value = aws_route53_record.bastion.name
 }
+output "bastion_security_group_id" {
+  value = aws_security_group.bastion.id
+}
 
 output "outline_security_group_id" {
   value = aws_security_group.outline.id

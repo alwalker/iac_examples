@@ -23,11 +23,15 @@ module "vpc" {
   name = var.env_name
   cidr = var.vpc_cidr
 
-  azs                 = var.vpc_availability_zones
-  private_subnets     = local.private_subnets
-  database_subnets    = local.dabatase_subnets
-  public_subnets      = local.public_subnets
-  elasticache_subnets = local.elasticache_subnets
+  azs                     = var.vpc_availability_zones
+  private_subnets         = local.private_subnets
+  private_subnet_tags     = { type = "private" }
+  database_subnets        = local.dabatase_subnets
+  database_subnet_tags    = { type = "database" }
+  public_subnets          = local.public_subnets
+  public_subnet_tags       = { type = "public" }
+  elasticache_subnets     = local.elasticache_subnets
+  elasticache_subnet_tags = { type = "elasticache" }
 
   enable_nat_gateway = true
   single_nat_gateway = true

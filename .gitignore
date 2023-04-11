@@ -34,3 +34,5 @@ override.tf.json
 terraform.rc
 
 ops/aws_setup_bastion_tunnel.sh
+infra/aws/cicd/source.zip
+infra/aws/iaas_app/terraform/packer/outline.pkr.hcl

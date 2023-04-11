@@ -83,6 +83,8 @@ resource "aws_route53_record" "main" {
 }
 
 data "shell_script" "oauth_info" {
+  depends_on = [ aws_cognito_user_pool_domain.main ]
+
   lifecycle_commands {
     read = <<-EOF
     curl -s https://${aws_cognito_user_pool.main.endpoint}/.well-known/openid-configuration

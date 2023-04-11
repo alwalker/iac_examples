@@ -1,3 +1,17 @@
+variable "outline_security_group_id" {
+  type = string
+}
+variable "alb_security_group_id" {
+  type = string
+}
+variable "bastion_security_group_id" {
+  type = string
+}
+variable "app_port" {
+  type = number
+}
+
+
 variable "name" {
   type = string
 }

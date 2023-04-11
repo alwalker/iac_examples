@@ -1,8 +1,7 @@
 while true
 do
-	echo "Querying A record for $ROOT_RECORD"
-
-	ANSWER=$(host -t A $ROOT_RECORD)
+	echo "Querying name server: $NAME_SERVER for A record for $ROOT_RECORD"
+	ANSWER=$(host -t A $ROOT_RECORD $NAME_SERVER)
 
 	if [[ $? == 0 ]]; then
 		break

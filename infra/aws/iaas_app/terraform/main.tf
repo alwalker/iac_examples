@@ -50,6 +50,9 @@ data "terraform_remote_state" "cicd" {
 }
 
 locals {
+  outline_port = 3000
+  dns_name     = "https://outline-prod.${data.terraform_remote_state.infra.outputs.prod_domain_name}"
+  oidc_url     = "https://oidc.${data.terraform_remote_state.infra.outputs.prod_domain_name}"
   default_tags = {
     managed_by_terraform = true
     env                  = "prod"
@@ -57,23 +60,24 @@ locals {
 }
 
 module "alb_endpoint" {
-  source = "./alb"
+  source = "../../terraform_modules/alb"
 
   name          = "outline"
-  port          = "6100"
+  port          = local.outline_port
+  target_type   = "instance"
   vpc_id        = data.terraform_remote_state.infra.outputs.prod.vpc.vpc_id
   listener_arn  = data.terraform_remote_state.infra.outputs.prod.alb_https_listener.arn
   priority      = "1000"
-  host_headers  = ["outline.${data.terraform_remote_state.infra.outputs.domain_name}"]
+  host_headers  = ["outline-prod.${data.terraform_remote_state.infra.outputs.prod_domain_name}"]
   hostedzone_id = data.terraform_remote_state.infra.outputs.prod.dns_zone.zone_id
-  dns_name      = "outline"
+  dns_name      = "outline-prod"
   alb_dns_name  = data.terraform_remote_state.infra.outputs.prod.alb.dns_name
   alb_dns_zone  = data.terraform_remote_state.infra.outputs.prod.alb.zone_id
   default_tags  = local.default_tags
 }
 
 module "database" {
-  source = "./database"
+  source = "../../terraform_modules/database"
 
   name = "outline"
 
@@ -83,33 +87,65 @@ module "database" {
 module "iam" {
   source = "./iam"
 
+  outline_security_group_id = data.terraform_remote_state.infra.outputs.prod.outline_security_group_id
+  alb_security_group_id     = data.terraform_remote_state.infra.outputs.prod.alb_security_group_id
+  bastion_security_group_id = data.terraform_remote_state.infra.outputs.prod.bastion_security_group_id
+  app_port                  = local.outline_port
+
   name             = "outline"
   cicd_bucket_name = data.terraform_remote_state.cicd.outputs.cicd_bucket_name
 
   default_tags = local.default_tags
 }
 
-# module "asg" {
-#   source = "./asg"
+module "cognito_client" {
+  source = "../../terraform_modules/cognito_client"
 
-#   name                      = "outline"
-#   aminame                   = "notyet"
-#   env_name                  = "prod"
-#   cicd_bucket_name          = data.terraform_remote_state.cicd.outputs.cicd_bucket_name
-#   instance_size             = "t3a.nano"
-#   security_group_ids        = [data.terraform_remote_state.infra.outputs.prod.outline_security_group_id]
-#   root_volume_size          = 20
-#   iam_profile_arn           = module.iam.iam_profile_arn
-#   max_instance_count        = 2
-#   min_instance_count        = 1
-#   health_check_grace_period = 30
-#   base_instance_count       = 1
-#   private_subnets           = data.terraform_remote_state.infra.outputs.prod.vpc.private_subnets
-#   target_groups             = [module.alb_endpoint.target_group_arn]
-#   asg_cpu_max_threshold     = 80
-#   asg_cpu_min_threshold     = 40
-#   default_tags              = local.default_tags
-# }
+  name            = "outline-prod"
+  cognito_pool_id = data.terraform_remote_state.infra.outputs.prod.cognito.user_pool.id
+
+  callback_urls = ["${local.dns_name}/auth/oidc.callback"]
+}
+
+module "cloudwatch" {
+  source = "./cloudwatch"
+
+  name        = "outline"
+  env_name    = "prod"
+  bucket_name = data.terraform_remote_state.cicd.outputs.cicd_bucket_name
+
+  default_tags = local.default_tags
+}
+
+module "asg" {
+  source = "./asg"
+  depends_on = [
+    module.cloudwatch,
+    module.database
+  ]
+
+  name     = "outline"
+  env_name = "prod"
+
+  ami_name = "outline-*"
+
+  instance_size             = "t3a.medium"
+  security_group_ids        = [data.terraform_remote_state.infra.outputs.prod.outline_security_group_id]
+  root_volume_size          = 20
+  iam_profile_arn           = module.iam.instance_profile.arn
+  iam_profile_name          = module.iam.instance_profile.name
+  max_instance_count        = 2
+  min_instance_count        = 1
+  health_check_grace_period = 360
+  base_instance_count       = 1
+  availability_zones        = data.terraform_remote_state.infra.outputs.prod.vpc.azs
+  vpc_id                    = data.terraform_remote_state.infra.outputs.prod.vpc.vpc_id
+  target_group_arn          = module.alb_endpoint.target_group_arn
+  target_group_arns         = [module.alb_endpoint.target_group_arn]
+  asg_cpu_max_threshold     = 80
+  asg_cpu_min_threshold     = 40
+  default_tags              = local.default_tags
+}
 
 resource "aws_s3_bucket" "main" {
   bucket = "awsiac-outline-prod2"
@@ -119,57 +155,32 @@ resource "aws_s3_bucket_acl" "main" {
   acl    = "private"
 }
 
-# resource "random_password" "database_admin_password" {
-#   length           = 32
-#   lower = false
-#   numeric = true
-#   special = false
-#   upper = false
-# }
-resource "random_id" "outline_secret_key" {
-  byte_length = 32
-}
-resource "random_id" "outline_util_secret_key" {
-  byte_length = 32
-}
-resource "aws_s3_object" "env_file" {
-  bucket                 = data.terraform_remote_state.cicd.outputs.cicd_bucket_name
-  key                    = "outline-prod-env"
-  acl                    = "private"
-  bucket_key_enabled     = true
-  server_side_encryption = "aws:kms"
-
-  content = <<-EOT
-  NODE_ENV=production
-  SECRET_KEY=${random_id.outline_secret_key.hex}"
-  UTILS_SECRET=${random_id.outline_util_secret_key.hex}"
-  DATABASE_URL=postgres://outline:${module.database.password}@data.terraform_remote_state.infra.outputs.prod.database.address:5432/outline
-  DATABASE_CONNECTION_POOL_MIN=1
-  DATABASE_CONNECTION_POOL_MAX=5
-  REDIS_URL=redis://redis
-  URL=https://outline.${data.terraform_remote_state.infra.outputs.domain_name}
-  PORT=6100
-  FORCE_HTTPS=false
-  AWS_S3_UPLOAD_BUCKET_NAME=${aws_s3_bucket.main.id}
-  EOT
-}
-
 # resource "aws_instance" "test_instance" {
-#   ami                         = "ami-0192e8a08823013ae"
+#   depends_on = [
+#     module.cloudwatch
+#   ]
+
+#   ami                         = "ami-0fb5beb1fe0e14a2a"
 #   instance_type               = "t3a.medium"
-#   vpc_security_group_ids      = ["sg-0c324ae210501ac5f"]
-#   subnet_id                   = data.terraform_remote_state.infra.outputs.prod.vpc.public_subnets[0]
-#   key_name                    = "prod-bastion-key"
-#   associate_public_ip_address = true
+#   vpc_security_group_ids      = [data.terraform_remote_state.infra.outputs.prod.outline_security_group_id]
+#   subnet_id                   = data.terraform_remote_state.infra.outputs.prod.vpc.private_subnets[0]
+#   key_name                    = "prod-bastion"
+#   iam_instance_profile        = module.iam.instance_profile.name
+#   user_data_replace_on_change = true
+#   user_data                   = <<-EOT
+#   #!/usr/bin/bash -xe
+#   echo -n "prod" | sudo -u outline tee /opt/outline/env_name
+#   sudo -iu outline bash /opt/outline/get_configs.sh
+#   EOT
 
 #   root_block_device {
 #     volume_type = "gp3"
 #     encrypted   = true
 #   }
 
-#   lifecycle {
-#     ignore_changes = [ami]
-#   }
-
 #   tags = merge({ Name = "test instance" }, local.default_tags)
+# }
+
+# output "test_ip" {
+#   value = aws_instance.test_instance.private_ip
 # }

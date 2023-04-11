@@ -6,6 +6,7 @@ resource "null_resource" "wait_for_dns" {
   provisioner "local-exec" {
     interpreter = ["/usr/bin/bash"]
     environment = {
+      NAME_SERVER = aws_route53_zone.main.name_servers[0]
       ROOT_RECORD = var.domain_name
     }
     command = "${path.module}/wait-for-dns.sh"

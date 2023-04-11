@@ -1,0 +1,44 @@
+packer {
+  required_plugins {
+    amazon = {
+      version = "~> 1.0.0"
+      source  = "github.com/hashicorp/amazon"
+    }
+  }
+}
+
+source "amazon-ebs" "outline" {
+  region  = "${aws_region}"
+
+  ami_name              = "outline-$${ formatdate("YYYY-MM-DD'T'hh-mm-ssZ", timestamp()) }"
+  ami_description       = "Image for running Outline.js wiki"
+  force_deregister      = false
+  force_delete_snapshot = false
+
+  instance_type               = "${instance_size}"
+  associate_public_ip_address = true
+  iam_instance_profile        = "${iam_packer_profile}"
+  subnet_id                   = "${vpc_subnet_id}"
+  vpc_id                      = "${vpc_id}"
+
+  ssh_interface = "public_ip"
+  ssh_username  = "ec2-user"
+  temporary_key_pair_type = "ed25519"
+
+  source_ami = "${source_ami_id}"
+  tags = {
+    Name = "Outline"
+  }
+}
+
+build {
+  name = "outline"
+  sources = [
+    "source.amazon-ebs.outline"
+  ]
+
+  provisioner "shell" {
+    script = "build_ami.sh"
+    execute_command = "echo 'packer' | sudo -S sh -c '{{ .Vars }} {{ .Path }}'"
+  }
+}

@@ -23,15 +23,11 @@ provider "aws" {
 
 provider "github" {}
 
-locals {
-  cicd_bucket_name = "alwiac-cicd"
-}
-
 resource "aws_kms_key" "bucket_key" {
   deletion_window_in_days = 10
 }
 resource "aws_s3_bucket" "main" {
-  bucket = local.cicd_bucket_name
+  bucket = "iac-examples-cicd"
 }
 resource "aws_s3_bucket_acl" "main" {
   bucket = aws_s3_bucket.main.id
@@ -86,4 +82,25 @@ resource "aws_iam_role_policy_attachment" "packer" {
 resource "aws_iam_instance_profile" "packer" {
   name = "packer"
   role = aws_iam_role.packer.id
+}
+
+data "archive_file" "source" {
+  type        = "zip"
+  output_path = "source.zip"
+  source_dir = "../../../src"
+  excludes    = [
+    ".git",
+    ".gitignore",
+    ".circleci",
+    ".vscode",
+    ".dockerignore"
+  ]
+}
+resource "aws_s3_object" "env_file" {
+  bucket                 = aws_s3_bucket.main.id
+  key                    = "source.zip"
+  acl                    = "private"
+  bucket_key_enabled     = true
+  server_side_encryption = "aws:kms"
+  source = data.archive_file.source.output_path
 }

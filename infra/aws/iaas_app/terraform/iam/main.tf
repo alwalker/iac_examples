@@ -1,3 +1,31 @@
+resource "aws_security_group_rule" "allow_alb_in" {
+  security_group_id = var.outline_security_group_id
+
+  type                     = "ingress"
+  from_port                = var.app_port
+  to_port                  = var.app_port
+  protocol                 = "tcp"
+  source_security_group_id = var.alb_security_group_id
+}
+resource "aws_security_group_rule" "allow_bastion_in" {
+  security_group_id = var.outline_security_group_id
+
+  type                     = "ingress"
+  from_port                = 22
+  to_port                  = 22
+  protocol                 = "tcp"
+  source_security_group_id = var.bastion_security_group_id
+}
+resource "aws_security_group_rule" "allow_outbound" {
+  security_group_id = var.outline_security_group_id
+
+  type        = "egress"
+  from_port   = 0
+  to_port     = 0
+  protocol    = "-1"
+  cidr_blocks = ["0.0.0.0/0"]
+}
+
 resource "aws_iam_role" "main" {
   name        = var.name
   description = "Allows EC2 tasks to do the things"

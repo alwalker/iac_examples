@@ -1,15 +1,11 @@
 variable "name" {
   type = string
 }
-
-variable "aminame" {
-  type = string
-}
-
 variable "env_name" {
   type = string
 }
-variable "cicd_bucket_name" {
+
+variable "ami_name" {
   type = string
 }
 
@@ -25,6 +21,9 @@ variable "root_volume_size" {
 variable "iam_profile_arn" {
   type = string
 }
+variable "iam_profile_name" {
+  type = string
+}
 
 variable "max_instance_count" {
   type = string
@@ -38,11 +37,17 @@ variable "health_check_grace_period" {
 variable "base_instance_count" {
   type = string
 }
-variable "private_subnets" {
+variable "availability_zones" {
   type = list(any)
 }
-variable "target_groups" {
-  type = list(any)
+variable "vpc_id" {
+  type = string
+}
+variable "target_group_arns" {
+  type = list(string)
+}
+variable "target_group_arn" {
+  type = string
 }
 
 variable "asg_cpu_max_threshold" {
