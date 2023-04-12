@@ -51,7 +51,7 @@ data "aws_region" "current" {}
 module "bastion_ami" {
   source = "../../../terraform_modules/centos_ami"
 
-  region = data.aws_region.current.name
+  region                = data.aws_region.current.name
   centos_version_number = 9
 }
 

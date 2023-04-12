@@ -87,8 +87,8 @@ resource "aws_iam_instance_profile" "packer" {
 data "archive_file" "source" {
   type        = "zip"
   output_path = "source.zip"
-  source_dir = "../../../src"
-  excludes    = [
+  source_dir  = "../../../src"
+  excludes = [
     ".git",
     ".gitignore",
     ".circleci",
@@ -102,5 +102,5 @@ resource "aws_s3_object" "env_file" {
   acl                    = "private"
   bucket_key_enabled     = true
   server_side_encryption = "aws:kms"
-  source = data.archive_file.source.output_path
+  source                 = data.archive_file.source.output_path
 }

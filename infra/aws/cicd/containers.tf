@@ -39,25 +39,25 @@ resource "aws_iam_user_policy_attachment" "task_execution" {
 }
 
 resource "github_actions_secret" "aws_access_key" {
-  repository = "iac_examples"
-  secret_name       = "AWS_ACCESS_KEY_ID"
-  plaintext_value   = aws_iam_access_key.cicd_containers.id
+  repository      = "iac_examples"
+  secret_name     = "AWS_ACCESS_KEY_ID"
+  plaintext_value = aws_iam_access_key.cicd_containers.id
 }
 resource "github_actions_secret" "aws_secret_access_key" {
-  repository = "iac_examples"
-  secret_name       = "AWS_SECRET_ACCESS_KEY"
-  plaintext_value   = aws_iam_access_key.cicd_containers.secret
+  repository      = "iac_examples"
+  secret_name     = "AWS_SECRET_ACCESS_KEY"
+  plaintext_value = aws_iam_access_key.cicd_containers.secret
 }
 
 data "template_file" "push_to_ecr_workflow" {
-    template = file("${path.module}/push_outline_to_ecr.tftpl")
+  template = file("${path.module}/push_outline_to_ecr.tftpl")
 
-    vars = {
-      ecr_repo = aws_ecr_repository.outline.repository_url
-      ecr_registry = split("/", aws_ecr_repository.outline.repository_url)[0]
-    }
+  vars = {
+    ecr_repo     = aws_ecr_repository.outline.repository_url
+    ecr_registry = split("/", aws_ecr_repository.outline.repository_url)[0]
+  }
 }
 resource "local_file" "push_to_ecr_workflow" {
   filename = "${path.module}/../../../.github/workflows/push_outline_to_ecr.yaml"
-  content = data.template_file.push_to_ecr_workflow.rendered
+  content  = data.template_file.push_to_ecr_workflow.rendered
 }

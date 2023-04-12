@@ -120,7 +120,7 @@ resource "aws_cloudwatch_log_group" "main" {
 module "cognito_client" {
   source = "../terraform_modules/cognito_client"
 
-  name = "outline-prod"
+  name            = "outline-prod"
   cognito_pool_id = data.terraform_remote_state.infra.outputs.prod.cognito.user_pool.id
 
   callback_urls = ["${local.dns_name}/auth/oidc.callback"]

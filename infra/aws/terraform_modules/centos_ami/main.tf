@@ -11,8 +11,8 @@ data "shell_script" "main" {
   }
 
   environment = {
-    AWS_REGION = var.region,
-    VERSION = var.centos_version_number,
+    AWS_REGION   = var.region,
+    VERSION      = var.centos_version_number,
     ARCHITECTURE = var.architecture
   }
 }

@@ -37,11 +37,11 @@ resource "aws_ecs_task_definition" "main" {
 
   container_definitions = jsonencode([
     {
-      name       = var.name
-      image      = var.outline_container_image_uri
-      cpu        = 1024
-      memory     = 2048
-      essential  = true
+      name      = var.name
+      image     = var.outline_container_image_uri
+      cpu       = 1024
+      memory    = 2048
+      essential = true
       portMappings = [
         {
           containerPort = var.app_port

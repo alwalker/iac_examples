@@ -1,11 +1,11 @@
 variable "name" {
-    type = string
+  type = string
 }
 variable "env_name" {
-    type = string
+  type = string
 }
 variable "bucket_name" {
-    type = string
+  type = string
 }
 
 variable "default_tags" {

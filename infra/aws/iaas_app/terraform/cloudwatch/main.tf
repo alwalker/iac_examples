@@ -9,8 +9,8 @@ data "template_file" "cloudwatch_config" {
   template = file("${path.module}/cloudwatch_config.tftpl")
 
   vars = {
-    log_group_name     = aws_cloudwatch_log_group.main.name
-    metrics_namespace  = "${var.env_name}-${var.name}"
+    log_group_name    = aws_cloudwatch_log_group.main.name
+    metrics_namespace = "${var.env_name}-${var.name}"
   }
 }
 resource "aws_s3_object" "cloudwatch_config" {

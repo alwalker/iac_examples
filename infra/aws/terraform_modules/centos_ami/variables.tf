@@ -1,10 +1,10 @@
 variable "region" {
-    type = string
+  type = string
 }
 variable "centos_version_number" {
-    type = number
+  type = number
 }
 variable "architecture" {
-    type = string
-    default = "x86_64"
+  type    = string
+  default = "x86_64"
 }

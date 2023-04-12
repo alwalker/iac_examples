@@ -62,7 +62,7 @@ data "aws_subnets" "valid_subnets" {
     values = [var.vpc_id]
   }
   filter {
-    name = "availability-zone"
+    name   = "availability-zone"
     values = data.aws_ec2_instance_type_offerings.valid_availability_zones.locations
   }
 

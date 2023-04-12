@@ -29,7 +29,7 @@ module "vpc" {
   database_subnets        = local.dabatase_subnets
   database_subnet_tags    = { type = "database" }
   public_subnets          = local.public_subnets
-  public_subnet_tags       = { type = "public" }
+  public_subnet_tags      = { type = "public" }
   elasticache_subnets     = local.elasticache_subnets
   elasticache_subnet_tags = { type = "elasticache" }
 

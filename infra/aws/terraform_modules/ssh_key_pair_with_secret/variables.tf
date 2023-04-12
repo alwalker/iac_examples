@@ -3,10 +3,10 @@ variable "name" {
 }
 
 variable "recovery_window_days" {
-  type = number
+  type    = number
   default = 0
 }
 
 variable "tags" {
-  type = map
+  type = map(any)
 }
