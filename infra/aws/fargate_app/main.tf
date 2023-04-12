@@ -132,7 +132,8 @@ module "ecs" {
     module.security
   ]
 
-  name = "outline"
+  name     = "outline"
+  env_name = "prod"
 
   cluster_arn          = data.terraform_remote_state.infra.outputs.prod.ecs_cluster.arn
   force_new_deployment = true
@@ -158,6 +159,12 @@ module "ecs" {
   log_region                  = "us-east-1"
   execution_role_arn          = module.security.task_execution_role_arn
   cicd_username               = data.terraform_remote_state.cicd.outputs.cicd_containers_username
+
+  cluster_name                  = data.terraform_remote_state.infra.outputs.prod.ecs_cluster.name
+  minimum_service_count         = 1
+  maximum_service_count         = 5
+  minimum_service_cpu_threshold = 30
+  maximum_service_cpu_threshold = 80
 
   default_tags = local.default_tags
 }

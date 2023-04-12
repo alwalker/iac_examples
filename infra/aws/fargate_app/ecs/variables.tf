@@ -1,6 +1,9 @@
 variable "name" {
   type = string
 }
+variable "env_name" {
+  type = string
+}
 
 variable "iam_role_arn" {
   type = string
@@ -73,6 +76,26 @@ variable "security_groups" {
 
 variable "cicd_username" {
   type = string
+}
+
+variable "cluster_name" {
+  type = string
+}
+variable "minimum_service_count" {
+  type    = number
+  default = 1
+}
+variable "maximum_service_count" {
+  type    = number
+  default = 10
+}
+variable "minimum_service_cpu_threshold" {
+  type    = number
+  default = 40
+}
+variable "maximum_service_cpu_threshold" {
+  type    = number
+  default = 80
 }
 
 variable "default_tags" {
