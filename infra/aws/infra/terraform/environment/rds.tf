@@ -43,12 +43,6 @@ resource "aws_secretsmanager_secret_version" "database_admin_password" {
 }
 
 resource "aws_db_instance" "main" {
-  lifecycle {
-    ignore_changes = [
-      latest_restorable_time
-    ]
-  }
-
   allocated_storage           = var.database_storage_size_gb
   allow_major_version_upgrade = false
   apply_immediately           = false

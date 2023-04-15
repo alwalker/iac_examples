@@ -4,6 +4,18 @@ output "vpc" {
 output "dns_zone" {
   value = aws_route53_zone.main
 }
+output "private_subnets_cidr" {
+  value = local.private_subnets
+}
+output "dabatase_subnets_cidr" {
+  value = local.dabatase_subnets
+}
+output "public_subnets_cidr" {
+  value = local.public_subnets
+}
+output "elasticache_subnets_cidr" {
+  value = local.elasticache_subnets
+}
 
 output "database" {
   value = aws_db_instance.main

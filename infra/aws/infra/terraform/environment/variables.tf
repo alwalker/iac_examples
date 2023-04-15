@@ -21,6 +21,10 @@ variable "vpc_availability_zones" {
     "us-east-1f"
   ]
 }
+variable "single_nat_gateway" {
+  type = bool
+  default = true
+}
 variable "vpc_private_subnets" {
   type    = list(string)
   default = []
@@ -56,7 +60,6 @@ variable "vpc_elasticache_subnet_offset" {
 variable "domain_name" {
   type = string
 }
-
 
 variable "database_storage_size_gb" {
   type    = number

@@ -47,6 +47,20 @@ module "prod" {
   }
 }
 
+module "eks" {
+  source = "./eks"
+
+  env_name = "prod"
+  vpc_id   = module.prod.vpc.vpc_id
+  private_route_table_ids = module.prod.vpc.private_route_table_ids
+  bastion_security_group_id = module.prod.bastion_security_group_id
+
+  default_tags = {
+    managed_by_terraform = true
+    env                  = "prod"
+  }
+}
+
 resource "local_sensitive_file" "bastion_ssh_private_key" {
   content  = module.prod.bastion_ssh_private_key
   filename = local.bastion_ssh_key_path
@@ -63,6 +77,7 @@ data "template_file" "ssh_tunnel_setup_script" {
     database_host_name = module.prod.database.address
     redis_host_name    = module.prod.redis.cache_nodes[0].address
     bastion_host_ip    = module.prod.bastion.public_ip
+    eks_api_host_name  = module.eks.api_host_name
   }
 }
 resource "local_file" "setup_bastion_tunnel_script" {

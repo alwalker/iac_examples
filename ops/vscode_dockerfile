@@ -52,6 +52,10 @@ RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/s
     && chmod +x kubectl \
     && mv kubectl /usr/local/bin
 
+RUN curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp \
+    && mv /tmp/eksctl /usr/local/bin \
+    && chmod +x /tmp/eksctl
+
 RUN curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 \
     && chmod 700 get_helm.sh \
     && ./get_helm.sh --no-sudo \
