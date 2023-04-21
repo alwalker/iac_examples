@@ -2,7 +2,9 @@ rm -f /root/.ssh/known_hosts
 
 echo "127.0.0.1 ${database_host_name}" >> /etc/hosts
 echo "127.0.0.1 ${redis_host_name}" >> /etc/hosts
+%{ if eks_api_host_name != "" }
 echo "127.0.0.1 ${eks_api_host_name}" >> /etc/hosts
+%{ endif }
 
 ssh -N -v \
     -i ${ssh_key_path} \

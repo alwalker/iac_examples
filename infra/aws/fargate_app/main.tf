@@ -102,7 +102,7 @@ module "security" {
 
   app_port                  = local.outline_port
   outline_security_group_id = data.terraform_remote_state.infra.outputs.prod.outline_security_group_id
-  alb_security_group_id     = data.terraform_remote_state.infra.outputs.prod.alb_security_group_id
+  alb_security_group_id     = data.terraform_remote_state.infra.outputs.prod.alb_security_group.id
 
   bucket_name = aws_s3_bucket.main.id
 

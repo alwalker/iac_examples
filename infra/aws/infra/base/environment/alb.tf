@@ -31,6 +31,8 @@ resource "aws_acm_certificate_validation" "main" {
 }
 
 resource "aws_security_group" "alb" {
+  count = var.enable_eks ? 0 : 1
+
   name        = "${var.env_name}-alb"
   vpc_id      = module.vpc.vpc_id
   description = "Allow HTTP and HTTPS in from the world"
@@ -59,18 +61,68 @@ resource "aws_security_group" "alb" {
 }
 
 resource "aws_lb" "main" {
+  count = var.enable_eks ? 0 : 1
+
   name                       = var.env_name
   internal                   = false
   load_balancer_type         = "application"
-  security_groups            = [aws_security_group.alb.id]
+  security_groups            = [aws_security_group.alb[0].id]
   subnets                    = module.vpc.public_subnets
   enable_deletion_protection = false
 
   tags = var.default_tags
 }
 
+# resource "aws_lb_target_group" "eks" {
+#   count = var.enable_eks ? 1 : 0
+
+#   name     = "${var.env_name}-eks"
+#   port     = 80
+#   protocol = "TCP"
+#   vpc_id   = module.vpc.vpc_id
+
+#   tags = var.default_tags
+# }
+# resource "aws_lb_listener" "eks_https" {
+#   count = var.enable_eks ? 1 : 0
+
+#   load_balancer_arn = aws_lb.main.arn
+#   port              = 443
+#   protocol          = "HTTP"
+
+#   default_action {
+#     type = "forward"
+
+#     forward {
+#       target_group {
+#         arn = aws_lb_target_group.eks[0].arn
+#       }
+#     }
+#   }
+# }
+# resource "aws_lb_listener" "eks_http" {
+#   count = var.enable_eks ? 1 : 0
+
+#   load_balancer_arn = aws_lb.main.arn
+#   port              = 80
+#   protocol          = "HTTPS"
+#   certificate_arn   = aws_acm_certificate.main.arn
+
+#   default_action {
+#     type = "forward"
+
+#     forward {
+#       target_group {
+#         arn = aws_lb_target_group.eks[0].arn
+#       }
+#     }
+#   }
+# }
+
 resource "aws_lb_listener" "https" {
-  load_balancer_arn = aws_lb.main.arn
+  count = var.enable_eks ? 0 : 1
+
+  load_balancer_arn = aws_lb.main[0].arn
   port              = 443
   protocol          = "HTTPS"
   certificate_arn   = aws_acm_certificate.main.arn
@@ -84,8 +136,11 @@ resource "aws_lb_listener" "https" {
     }
   }
 }
+
 resource "aws_lb_listener" "http_redirect" {
-  load_balancer_arn = aws_lb.main.arn
+  count = var.enable_eks ? 0 : 1
+
+  load_balancer_arn = aws_lb.main[0].arn
   port              = "80"
   protocol          = "HTTP"
 

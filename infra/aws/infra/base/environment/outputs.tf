@@ -48,14 +48,15 @@ output "outline_security_group_id" {
 }
 
 output "alb" {
-  value = aws_lb.main
+  value = var.enable_eks ? null : aws_lb.main[0]
 }
 output "alb_https_listener" {
-  value = aws_lb_listener.https
+  value = var.enable_eks ? null : aws_lb_listener.https[0]
 }
-output "alb_security_group_id" {
-  value = aws_security_group.alb.id
+output "alb_security_group" {
+  value = var.enable_eks ? null : aws_security_group.alb[0]
 }
+
 output "acm_cert_arn" {
   value = aws_acm_certificate.main.arn
 }

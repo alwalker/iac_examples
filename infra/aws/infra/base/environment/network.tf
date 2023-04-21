@@ -25,11 +25,11 @@ module "vpc" {
 
   azs                     = var.vpc_availability_zones
   private_subnets         = local.private_subnets
-  private_subnet_tags     = { type = "private" }
+  private_subnet_tags     = { type = "private", "kubernetes.io/role/internal-elb" = 1 }
   database_subnets        = local.dabatase_subnets
   database_subnet_tags    = { type = "database" }
   public_subnets          = local.public_subnets
-  public_subnet_tags      = { type = "public" }
+  public_subnet_tags      = { type = "public", "kubernetes.io/role/elb" = 1 }
   elasticache_subnets     = local.elasticache_subnets
   elasticache_subnet_tags = { type = "elasticache" }
 

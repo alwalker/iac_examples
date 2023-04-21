@@ -88,7 +88,7 @@ module "iam" {
   source = "./iam"
 
   outline_security_group_id = data.terraform_remote_state.infra.outputs.prod.outline_security_group_id
-  alb_security_group_id     = data.terraform_remote_state.infra.outputs.prod.alb_security_group_id
+  alb_security_group_id     = data.terraform_remote_state.infra.outputs.prod.alb_security_group.id
   bastion_security_group_id = data.terraform_remote_state.infra.outputs.prod.bastion_security_group_id
   app_port                  = local.outline_port
 

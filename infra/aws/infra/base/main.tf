@@ -30,6 +30,7 @@ provider "namecheap" {
 locals {
   domain_name          = "iac-examples.com"
   bastion_ssh_key_path = "/tmp/bastion_ssh_key"
+  enable_eks = true
 }
 
 module "prod" {
@@ -40,6 +41,7 @@ module "prod" {
   domain_name             = local.domain_name
   database_admin_username = "acmeadmin"
   app_port                = "6100"
+  enable_eks = local.enable_eks
 
   default_tags = {
     managed_by_terraform = true
@@ -48,6 +50,7 @@ module "prod" {
 }
 
 module "eks" {
+  count = local.enable_eks ? 1 : 0
   source = "./eks"
 
   env_name = "prod"
@@ -77,7 +80,7 @@ data "template_file" "ssh_tunnel_setup_script" {
     database_host_name = module.prod.database.address
     redis_host_name    = module.prod.redis.cache_nodes[0].address
     bastion_host_ip    = module.prod.bastion.public_ip
-    eks_api_host_name  = module.eks.api_host_name
+    eks_api_host_name  = local.enable_eks ? module.eks[0].api_host_name : ""
   }
 }
 resource "local_file" "setup_bastion_tunnel_script" {

@@ -54,7 +54,11 @@ RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/s
 
 RUN curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp \
     && mv /tmp/eksctl /usr/local/bin \
-    && chmod +x /tmp/eksctl
+    && chmod +x /usr/local/bin/eksctl
+
+ARG K9S_VERSION=v0.27.3
+RUN curl --silent --location "https://github.com/derailed/k9s/releases/download/${K9S_VERSION}/k9s_Linux_amd64.tar.gz" | tar xz -C /tmp \
+    && mv /tmp/k9s /usr/local/bin
 
 RUN curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 \
     && chmod 700 get_helm.sh \

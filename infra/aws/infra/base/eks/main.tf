@@ -149,11 +149,22 @@ module "eks" {
     iam_role_attach_cni_policy = true
 
     metadata_options = {
-        http_endpoint               = "enabled"
-        http_tokens                 = "required"
-        http_put_response_hop_limit = 2
-        instance_metadata_tags      = "disabled"
+      http_endpoint               = "enabled"
+      http_tokens                 = "required"
+      http_put_response_hop_limit = 2
+      instance_metadata_tags      = "disabled"
+    }
+
+    node_security_group_additional_rules = {
+      ingress_allow_access_from_control_plane = {
+        type                          = "ingress"
+        protocol                      = "tcp"
+        from_port                     = 9443
+        to_port                       = 9443
+        source_cluster_security_group = true
+        description                   = "Allow access from control plane to webhook port of AWS load balancer controller"
       }
+    }
   }
 
   eks_managed_node_groups = {
@@ -178,8 +189,8 @@ module "eks" {
 
       subnet_ids = data.aws_subnets.valid_eks_node_subnets.ids
 
-      min_size     = 0
-      max_size     = 7
+      min_size = 0
+      max_size = 7
 
       capacity_type        = "SPOT"
       force_update_version = true

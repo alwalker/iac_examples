@@ -5,6 +5,10 @@ variable "centos_stream_version" {
   type    = string
   default = 9
 }
+variable "enable_eks" {
+  type = bool
+  default = false
+}
 
 variable "vpc_cidr" {
   type    = string
