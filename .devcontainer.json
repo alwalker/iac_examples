@@ -17,7 +17,8 @@
                 "streetsidesoftware.code-spell-checker",
                 "shardulm94.trailing-spaces",
                 "hashicorp.terraform",
-                "hashicorp.hcl"
+                "hashicorp.hcl",
+                "ms-kubernetes-tools.vscode-kubernetes-tools"
             ]
         }
     }

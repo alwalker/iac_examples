@@ -3,12 +3,12 @@ services:
   redis:
     image: redis
     ports:
-      - "127.0.0.1:6379:6379"
+      - "127.0.0.1:6378:6379"
     user: "redis:redis"
   postgres:
     image: postgres
     ports:
-      - "127.0.0.1:5432:5432"
+      - "127.0.0.1:5433:5432"
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: pass
@@ -21,7 +21,7 @@ services:
     volumes:
       - ./fakes3:/fakes3_root
   outline:
-    image: outlinewiki/outline
+    image: docker.io/outlinewiki/outline
     depends_on:
       - postgres
       - redis
@@ -42,5 +42,4 @@ services:
       - FORCE_HTTPS=false
       - AWS_S3_UPLOAD_BUCKET_URL=http://s3:4569
       - AWS_S3_UPLOAD_BUCKET_NAME=bucket_name_here
-      
-
+      - DEBUG=cache,presenters,events,emails,mailer,utils,multiplayer,server,services

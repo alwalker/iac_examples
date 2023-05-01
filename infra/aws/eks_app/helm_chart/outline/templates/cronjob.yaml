@@ -1,0 +1,28 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "outline.fullname" . }}-cleanup-job
+  labels:
+    {{- include "outline.labels" . | nindent 4 }}
+spec:
+  schedule: "{{ .Values.cleanupJobSchedule }}"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: {{ .Chart.Name }}-cleanup-job
+            image: curlimages/curl
+            imagePullPolicy: {{ .Values.image.pullPolicy }}
+            command:
+                - "/bin/sh"
+                - "-c"
+                - "curl -v {{ .Values.config.baseURL }}/api/cron.daily?token=$UTILS_SECRET"
+            envFrom:
+            - configMapRef:
+                name: {{ include "outline.fullname" . }}-env
+            resources:
+              requests:
+                cpu: 100m
+                memory: 32Mi
+          restartPolicy: OnFailure

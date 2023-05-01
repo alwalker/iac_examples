@@ -1,19 +1,19 @@
 variable "name" {
-  type  = string
+  type = string
 }
 variable "availability_zone" {
-    type = string
+  type = string
 }
 variable "cidr_block" {
-    type = string
+  type = string
 }
 variable "vpc_id" {
-    type = string
+  type = string
 }
 variable "route_table_id" {
-    type = string
+  type = string
 }
 
 variable "default_tags" {
-    type = map(any)
+  type = map(any)
 }

@@ -10,10 +10,10 @@ terraform {
 locals {
   num_azs = length(var.vpc_availability_zones)
 
-  private_subnets           = length(var.vpc_private_subnets) == 0 ? [for i in range(local.num_azs) : cidrsubnet(var.vpc_cidr, 8, i + var.vpc_private_subnet_offset)] : var.vpc_private_subnets
-  dabatase_subnets          = length(var.vpc_database_subnets) == 0 ? [for i in range(local.num_azs) : cidrsubnet(var.vpc_cidr, 8, i + var.vpc_database_subnet_offset)] : var.vpc_database_subnets
-  public_subnets            = length(var.vpc_public_subnets) == 0 ? [for i in range(local.num_azs) : cidrsubnet(var.vpc_cidr, 8, i + var.vpc_public_subnet_offset)] : var.vpc_public_subnets
-  elasticache_subnets       = length(var.vpc_elasticache_subnets) == 0 ? [for i in range(local.num_azs) : cidrsubnet(var.vpc_cidr, 8, i + var.vpc_elasticache_subnet_offset)] : var.vpc_elasticache_subnets
+  private_subnets     = length(var.vpc_private_subnets) == 0 ? [for i in range(local.num_azs) : cidrsubnet(var.vpc_cidr, 8, i + var.vpc_private_subnet_offset)] : var.vpc_private_subnets
+  dabatase_subnets    = length(var.vpc_database_subnets) == 0 ? [for i in range(local.num_azs) : cidrsubnet(var.vpc_cidr, 8, i + var.vpc_database_subnet_offset)] : var.vpc_database_subnets
+  public_subnets      = length(var.vpc_public_subnets) == 0 ? [for i in range(local.num_azs) : cidrsubnet(var.vpc_cidr, 8, i + var.vpc_public_subnet_offset)] : var.vpc_public_subnets
+  elasticache_subnets = length(var.vpc_elasticache_subnets) == 0 ? [for i in range(local.num_azs) : cidrsubnet(var.vpc_cidr, 8, i + var.vpc_elasticache_subnet_offset)] : var.vpc_elasticache_subnets
 }
 
 module "vpc" {

@@ -29,6 +29,12 @@ data "aws_subnets" "valid_eks_node_subnets" {
     type = "eks-node"
   }
 }
+data "aws_subnet" "node_subnets" {
+  # for_each = { for k,v in data.aws_subnets.valid_eks_node_subnets.ids : k => v.id }
+  count = length(data.aws_subnets.valid_eks_node_subnets)
+
+  id = data.aws_subnets.valid_eks_node_subnets.ids[count.index]
+}
 
 data "aws_ec2_instance_type_offerings" "valid_eks_control_plane_availability_zones" {
   filter {
@@ -62,24 +68,11 @@ data "aws_subnets" "valid_eks_control_plane_subnets" {
   }
 }
 
-resource "aws_security_group" "eks" {
-  name        = "${var.env_name}-eks-bastion-access"
+resource "aws_security_group" "bastion_api_access" {
+  name        = "${var.env_name}-eks-bastion-api-access"
   vpc_id      = var.vpc_id
-  description = "Allow SSH and HTTPS in from the bastion"
+  description = "Allow HTTPS in from the bastion"
 
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port       = var.ssh_port
-    to_port         = var.ssh_port
-    protocol        = "tcp"
-    security_groups = [var.bastion_security_group_id]
-  }
   ingress {
     from_port       = 443
     to_port         = 443
@@ -89,6 +82,43 @@ resource "aws_security_group" "eks" {
 
   tags = merge({ Name = "${var.env_name}-eks-bastion-access" }, var.default_tags)
 }
+resource "aws_security_group" "coredns" {
+  name        = "${var.env_name}-eks-coredns"
+  vpc_id      = var.vpc_id
+  description = "Allow DNS requests from other nodes"
+
+  ingress {
+    from_port   = 53
+    to_port     = 53
+    protocol    = "tcp"
+    cidr_blocks = [for sn in data.aws_subnet.node_subnets : sn.cidr_block]
+  }
+  ingress {
+    from_port   = 53
+    to_port     = 53
+    protocol    = "udp"
+    cidr_blocks = [for sn in data.aws_subnet.node_subnets : sn.cidr_block]
+  }
+
+  tags = merge({ Name = "${var.env_name}-eks-bastion-access" }, var.default_tags)
+}
+
+module "vpc_cni_irsa" {
+  source = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
+
+  role_name             = "vpc_cni"
+  attach_vpc_cni_policy = true
+  vpc_cni_enable_ipv4   = true
+
+  oidc_providers = {
+    main = {
+      provider_arn               = module.eks.oidc_provider_arn
+      namespace_service_accounts = ["kube-system:aws-node"]
+    }
+  }
+
+  tags = var.default_tags
+}
 
 module "eks_ssh_key" {
   source = "../../../terraform_modules/ssh_key_pair_with_secret"
@@ -96,6 +126,29 @@ module "eks_ssh_key" {
   name = "${var.env_name}-eks"
 
   tags = var.default_tags
+}
+
+resource "aws_iam_policy" "apps_ecr_access" {
+  name = "ecr-eks-access"
+  path = "/"
+
+  policy = <<-EOJ
+  {
+      "Version": "2012-10-17",
+      "Statement": [
+          {
+              "Effect": "Allow",
+              "Action": [
+                  "ecr:BatchCheckLayerAvailability",
+                  "ecr:BatchGetImage",
+                  "ecr:GetDownloadUrlForLayer",
+                  "ecr:GetAuthorizationToken"
+              ],
+              "Resource": "*"
+          }
+      ]
+  }
+  EOJ
 }
 
 module "eks" {
@@ -131,21 +184,15 @@ module "eks" {
     }
   }
 
-  vpc_id                   = var.vpc_id
-  subnet_ids               = data.aws_subnets.valid_eks_node_subnets.ids          #[for s in module.eks_node_subnets[*].self : s.id]
-  control_plane_subnet_ids = data.aws_subnets.valid_eks_control_plane_subnets.ids #[for s in module.eks_control_plane_subnets[*].self : s.id]
-
-  cluster_additional_security_group_ids = [aws_security_group.eks.id]
+  vpc_id                                = var.vpc_id
+  subnet_ids                            = data.aws_subnets.valid_eks_node_subnets.ids
+  control_plane_subnet_ids              = data.aws_subnets.valid_eks_control_plane_subnets.ids
+  cluster_additional_security_group_ids = [aws_security_group.bastion_api_access.id]
 
   eks_managed_node_group_defaults = {
     ami_type       = "AL2_x86_64"
-    instance_types = ["t3a.small"]
+    instance_types = ["t3a.medium"]
 
-    # We are using the IRSA created below for permissions
-    # However, we have to deploy with the policy attached FIRST (when creating a fresh cluster)
-    # and then turn this off after the cluster/node group is created. Without this initial policy,
-    # the VPC CNI fails to assign IPs and nodes cannot join the cluster
-    # See https://github.com/aws/containers-roadmap/issues/1666 for more context
     iam_role_attach_cni_policy = true
 
     metadata_options = {
@@ -164,22 +211,47 @@ module "eks" {
         source_cluster_security_group = true
         description                   = "Allow access from control plane to webhook port of AWS load balancer controller"
       }
+      bastion_ssh_access = {
+        type                     = "ingress"
+        protocol                 = "tcp"
+        from_port                = var.ssh_port
+        to_port                  = var.ssh_port
+        source_security_group_id = var.bastion_security_group_id
+        description              = "Allow access from control plane to webhook port of AWS load balancer controller"
+      }
     }
   }
 
   eks_managed_node_groups = {
-    # Default node group - as provided by AWS EKS
-    default_node_group = {
-      # By default, the module creates a launch template to ensure tags are propagated to instances, etc.,
-      # so we need to disable it to use the default template provided by the AWS EKS managed node group service
-      use_custom_launch_template = false
+    system = {
+      name            = "system"
+      use_name_prefix = true
 
-      disk_size = 50
+      subnet_ids = data.aws_subnets.valid_eks_node_subnets.ids
 
-      # Remote access cannot be specified with a launch template
-      remote_access = {
-        ec2_ssh_key               = module.eks_ssh_key.aws_key_pair.key_name
-        source_security_group_ids = [aws_security_group.eks.id]
+      min_size = 0
+      max_size = 2
+
+      force_update_version = true
+      instance_types       = ["t3a.small"]
+
+      labels = {
+        purpose = "system"
+      }
+      # taints = [
+      #   {
+      #     key    = "dedicated"
+      #     value  = "apps"
+      #     effect = "NO_SCHEDULE"
+      #   }
+      # ]
+
+      ebs_optimized           = true
+      disable_api_termination = false
+      enable_monitoring       = true
+
+      tags = {
+        EKS-node-pool-name = "apps"
       }
     }
 
@@ -211,26 +283,15 @@ module "eks" {
       disable_api_termination = false
       enable_monitoring       = true
 
+      iam_role_additional_policies = {
+        testme = aws_iam_policy.apps_ecr_access.arn
+      }
+
+      vpc_security_group_ids = [var.outline_security_group_id]
+
       tags = {
         EKS-node-pool-name = "apps"
       }
-    }
-  }
-
-  tags = var.default_tags
-}
-
-module "vpc_cni_irsa" {
-  source = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-
-  role_name             = "vpc_cni"
-  attach_vpc_cni_policy = true
-  vpc_cni_enable_ipv4   = true
-
-  oidc_providers = {
-    main = {
-      provider_arn               = module.eks.oidc_provider_arn
-      namespace_service_accounts = ["kube-system:aws-node"]
     }
   }
 

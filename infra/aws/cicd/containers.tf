@@ -3,6 +3,11 @@ resource "aws_ecr_repository" "outline" {
 
   force_delete = true
 }
+resource "aws_ecr_repository" "troubleshooting" {
+  name = "troubleshooting"
+
+  force_delete = true
+}
 
 resource "aws_iam_user" "cicd_containers" {
   name = "cicd-containers"

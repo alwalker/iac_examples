@@ -65,10 +65,10 @@ locals {
 resource "aws_s3_bucket" "main" {
   bucket = "awsiac-outline-prod2"
 }
-resource "aws_s3_bucket_acl" "main" {
-  bucket = aws_s3_bucket.main.id
-  acl    = "private"
-}
+# resource "aws_s3_bucket_acl" "main" {
+#   bucket = aws_s3_bucket.main.id
+#   acl    = "private"
+# }
 
 module "alb_endpoint" {
   source = "../terraform_modules/alb"

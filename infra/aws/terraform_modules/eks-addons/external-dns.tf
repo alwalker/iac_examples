@@ -31,8 +31,8 @@ resource "kubernetes_manifest" "serviceaccount_external_dns" {
     "kind"       = "ServiceAccount"
     "metadata" = {
       "labels" = {
-        "app.kubernetes.io/name" = "external-dns"
-          "app.kubernetes.io/managed-by" = "terraform"
+        "app.kubernetes.io/name"       = "external-dns"
+        "app.kubernetes.io/managed-by" = "terraform"
       }
       "annotations" = {
         "eks.amazonaws.com/role-arn" = tostring(try(module.vpc_external_dns_irsa.iam_role_arn, ""))
@@ -48,7 +48,7 @@ resource "kubernetes_manifest" "clusterrole_external_dns" {
     "kind"       = "ClusterRole"
     "metadata" = {
       "labels" = {
-        "app.kubernetes.io/name" = "external-dns"
+        "app.kubernetes.io/name"       = "external-dns"
         "app.kubernetes.io/managed-by" = "terraform"
       }
       "name" = "external-dns"
@@ -93,7 +93,7 @@ resource "kubernetes_manifest" "clusterrolebinding_external_dns_viewer" {
     "kind"       = "ClusterRoleBinding"
     "metadata" = {
       "labels" = {
-        "app.kubernetes.io/name" = "external-dns"
+        "app.kubernetes.io/name"       = "external-dns"
         "app.kubernetes.io/managed-by" = "terraform"
       }
       "name" = "external-dns-viewer"
@@ -118,7 +118,7 @@ resource "kubernetes_manifest" "deployment_external_dns" {
     "kind"       = "Deployment"
     "metadata" = {
       "labels" = {
-        "app.kubernetes.io/name" = "external-dns"
+        "app.kubernetes.io/name"       = "external-dns"
         "app.kubernetes.io/managed-by" = "terraform"
       }
       "name"      = "external-dns"
@@ -166,35 +166,4 @@ resource "kubernetes_manifest" "deployment_external_dns" {
       }
     }
   }
-}
-
-resource "helm_release" "nginx" {
-  name       = "nginx"
-  repository = "https://charts.bitnami.com/bitnami"
-  chart      = "nginx"
-
-  values = [
-    <<-EOY
-    service:
-      type: NodePort
-    ingress:
-        enabled: true
-        hostname: nginx.iac-examples.com
-        ingressClassName: alb
-        annotations:
-          alb.ingress.kubernetes.io/scheme: internet-facing
-          alb.ingress.kubernetes.io/load-balancer-name: ${var.env_name}
-          alb.ingress.kubernetes.io/group.name: ${var.env_name}
-          alb.ingress.kubernetes.io/certificate-arn : ${var.acm_cert_arn}
-          alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
-          alb.ingress.kubernetes.io/ssl-redirect: '443'
-    nodeSelector:
-        purpose: apps
-    tolerations:
-        - key: dedicated
-          operator: Equal
-          value: apps
-          effect: NoSchedule
-    EOY
-  ]
 }

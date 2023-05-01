@@ -29,10 +29,10 @@ resource "aws_kms_key" "bucket_key" {
 resource "aws_s3_bucket" "main" {
   bucket = "iac-examples-cicd"
 }
-resource "aws_s3_bucket_acl" "main" {
-  bucket = aws_s3_bucket.main.id
-  acl    = "private"
-}
+# resource "aws_s3_bucket_acl" "main" {
+#   bucket = aws_s3_bucket.main.id
+#   acl    = "private"
+# }
 resource "aws_s3_bucket_server_side_encryption_configuration" "main" {
   bucket = aws_s3_bucket.main.id
 

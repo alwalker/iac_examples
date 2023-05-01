@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "outline.fullname" . }}-env
+  labels:
+    {{- include "outline.labels" . | nindent 4 }}
+data:
+  NODE_ENV: production
+  SECRET_KEY: "{{ .Values.config.secretKey }}"
+  UTILS_SECRET: "{{ .Values.config.utilitySecretKey }}"
+  DATABASE_URL: {{ .Values.config.databaseURL }}
+  DATABASE_CONNECTION_POOL_MIN: "{{ .Values.config.databaseMinConnectionPoolSize | default 1 }}"
+  DATABASE_CONNECTION_POOL_MAX: "{{ .Values.config.databaseMaxConnectionPoolSize | default 5 }}"
+  REDIS_URL: {{ .Values.config.redisURL }}
+  URL: {{ .Values.config.baseURL }}
+  PORT: "{{ .Values.config.port }}"
+  FORCE_HTTPS: "false"
+  AWS_S3_UPLOAD_BUCKET_NAME: {{ .Values.config.s3BucketName }}
+  OIDC_CLIENT_ID: {{ .Values.config.oidcClientId }}
+  OIDC_CLIENT_SECRET: {{ .Values.config.oidcClientSecret }}
+  OIDC_AUTH_URI: {{ .Values.config.oidcAuthURI }}
+  OIDC_TOKEN_URI: {{ .Values.config.oidcTokenURI }}
+  OIDC_USERINFO_URI: {{ .Values.config.oidcUserInfoURI }}
+  OIDC_USERNAME_CLAIM: {{ .Values.config.oidcUserNameClaim }}

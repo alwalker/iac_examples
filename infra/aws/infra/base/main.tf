@@ -30,7 +30,7 @@ provider "namecheap" {
 locals {
   domain_name          = "iac-examples.com"
   bastion_ssh_key_path = "/tmp/bastion_ssh_key"
-  enable_eks = true
+  enable_eks           = true
 }
 
 module "prod" {
@@ -41,7 +41,7 @@ module "prod" {
   domain_name             = local.domain_name
   database_admin_username = "acmeadmin"
   app_port                = "6100"
-  enable_eks = local.enable_eks
+  enable_eks              = local.enable_eks
 
   default_tags = {
     managed_by_terraform = true
@@ -50,13 +50,14 @@ module "prod" {
 }
 
 module "eks" {
-  count = local.enable_eks ? 1 : 0
+  count  = local.enable_eks ? 1 : 0
   source = "./eks"
 
-  env_name = "prod"
-  vpc_id   = module.prod.vpc.vpc_id
-  private_route_table_ids = module.prod.vpc.private_route_table_ids
+  env_name                  = "prod"
+  vpc_id                    = module.prod.vpc.vpc_id
+  private_route_table_ids   = module.prod.vpc.private_route_table_ids
   bastion_security_group_id = module.prod.bastion_security_group_id
+  outline_security_group_id = module.prod.outline_security_group_id
 
   default_tags = {
     managed_by_terraform = true
