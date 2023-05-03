@@ -11,8 +11,7 @@ variable "outline_security_group_id" {
 variable "alb_security_group_id" {
   type = string
 }
-
-variable "bucket_name" {
+variable "outline_bucket_policy_arn" {
   type = string
 }
 

@@ -39,21 +39,9 @@ resource "aws_iam_role" "task" {
 
   tags = var.default_tags
 }
-data "template_file" "task_policies" {
-  template = file("${path.module}/policy.json")
-
-  vars = {
-    bucket_name = var.bucket_name
-  }
-}
-resource "aws_iam_policy" "task" {
-  name        = var.name
-  description = "Grant outline permisions to do the things"
-  policy      = data.template_file.task_policies.rendered
-}
 resource "aws_iam_role_policy_attachment" "task" {
   role       = aws_iam_role.task.name
-  policy_arn = aws_iam_policy.task.arn
+  policy_arn = var.outline_bucket_policy_arn
 }
 
 resource "aws_iam_role" "task_execution" {

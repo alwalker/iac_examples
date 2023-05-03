@@ -62,13 +62,14 @@ locals {
   }
 }
 
-resource "aws_s3_bucket" "main" {
-  bucket = "awsiac-outline-prod2"
+module "s3" {
+  source = "../terraform_modules/outline_s3_bucket"
+
+  env_name = "prod"
+  base_url = local.dns_name
+
+  default_tags = local.default_tags
 }
-# resource "aws_s3_bucket_acl" "main" {
-#   bucket = aws_s3_bucket.main.id
-#   acl    = "private"
-# }
 
 module "alb_endpoint" {
   source = "../terraform_modules/alb"
@@ -103,8 +104,7 @@ module "security" {
   app_port                  = local.outline_port
   outline_security_group_id = data.terraform_remote_state.infra.outputs.prod.outline_security_group_id
   alb_security_group_id     = data.terraform_remote_state.infra.outputs.prod.alb_security_group.id
-
-  bucket_name = aws_s3_bucket.main.id
+  outline_bucket_policy_arn = module.s3.iam_policy.arn
 
   default_tags = local.default_tags
 }
@@ -149,7 +149,9 @@ module "ecs" {
   database_host               = data.terraform_remote_state.infra.outputs.prod.database.address
   redis_host                  = data.terraform_remote_state.infra.outputs.prod.redis.cache_nodes[0].address
   outline_url                 = local.dns_name
-  bucket_name                 = aws_s3_bucket.main.id
+  bucket_name                 = module.s3.bucket.id
+  bucket_url                  = "https://${module.s3.bucket.bucket_regional_domain_name}"
+  bucket_max_upload_size      = 262144000
   oidc_client_id              = module.cognito_client.self.id
   oidc_client_secret          = module.cognito_client.self.client_secret
   oidc_auth_url               = data.terraform_remote_state.infra.outputs.prod.cognito.oauth_info["authorization_endpoint"]

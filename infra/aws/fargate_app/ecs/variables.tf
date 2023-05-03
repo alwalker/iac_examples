@@ -29,6 +29,12 @@ variable "outline_url" {
 variable "bucket_name" {
   type = string
 }
+variable "bucket_url" {
+  type = string
+}
+variable "bucket_max_upload_size" {
+  type = number
+}
 variable "oidc_client_id" {
   type = string
 }

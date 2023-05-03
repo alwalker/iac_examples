@@ -30,7 +30,7 @@ provider "namecheap" {
 locals {
   domain_name          = "iac-examples.com"
   bastion_ssh_key_path = "/tmp/bastion_ssh_key"
-  enable_eks           = true
+  enable_eks           = false
 }
 
 module "prod" {
