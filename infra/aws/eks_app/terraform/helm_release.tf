@@ -7,7 +7,8 @@ resource "random_id" "util_secret_key" {
 
 resource "helm_release" "main" {
   depends_on = [
-    aws_iam_role_policy_attachment.main
+    aws_iam_role_policy_attachment.main,
+    module.s3
   ]
 
   name             = "outline"
@@ -56,7 +57,9 @@ resource "helm_release" "main" {
       redisURL: ${data.terraform_remote_state.infra.outputs.prod.redis.cache_nodes[0].address}
       baseURL: https://${local.outline_dns_name}
       port: ${local.outline_port}
-      s3BucketName: ${aws_s3_bucket.main.id}
+      s3BucketName: ${module.s3.bucket.id}
+      s3BucketUrl: https://${module.s3.bucket.bucket_regional_domain_name}
+      s3UploadMaxSize: "262144000"
       oidcClientId: ${module.cognito_client.self.id}
       oidcClientSecret: ${module.cognito_client.self.client_secret}
       oidcAuthURI: ${data.terraform_remote_state.infra.outputs.prod.cognito.oauth_info["authorization_endpoint"]}

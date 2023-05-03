@@ -95,3 +95,12 @@ module "database" {
 
   default_tags = local.default_tags
 }
+
+module "s3" {
+  source = "../../terraform_modules/outline_s3_bucket"
+
+  env_name = local.env_name
+  base_url = "https://${local.outline_dns_name}"
+
+  default_tags = local.default_tags
+}

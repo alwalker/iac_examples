@@ -16,6 +16,9 @@ data:
   PORT: "{{ .Values.config.port }}"
   FORCE_HTTPS: "false"
   AWS_S3_UPLOAD_BUCKET_NAME: {{ .Values.config.s3BucketName }}
+  AWS_S3_FORCE_PATH_STYLE: "false"
+  AWS_S3_UPLOAD_BUCKET_URL: {{ .Values.config.s3BucketUrl }}
+  AWS_S3_UPLOAD_MAX_SIZE: "{{ .Values.config.s3UploadMaxSize }}"
   OIDC_CLIENT_ID: {{ .Values.config.oidcClientId }}
   OIDC_CLIENT_SECRET: {{ .Values.config.oidcClientSecret }}
   OIDC_AUTH_URI: {{ .Values.config.oidcAuthURI }}

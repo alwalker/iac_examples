@@ -4,30 +4,6 @@ locals {
   dns_suffix = data.aws_partition.current.dns_suffix
 }
 
-resource "aws_iam_policy" "main" {
-  name = "${local.env_name}-outline"
-  path = "/"
-
-  policy = <<-EOJ
-  {
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Sid": "VisualEditor0",
-            "Effect": "Allow",
-            "Action": [
-                "s3:*"
-            ],
-            "Resource": [
-                "arn:aws:s3:::${aws_s3_bucket.main.id}",
-                "arn:aws:s3:::${aws_s3_bucket.main.id}/*"
-            ]
-        }
-    ]
-  }
-  EOJ
-}
-
 data "aws_iam_policy_document" "trust" {
   statement {
     effect  = "Allow"
@@ -63,6 +39,6 @@ resource "aws_iam_role" "main" {
 
 resource "aws_iam_role_policy_attachment" "main" {
   role       = aws_iam_role.main.name
-  policy_arn = aws_iam_policy.main.arn
+  policy_arn = module.s3.iam_policy.arn
 }
 
