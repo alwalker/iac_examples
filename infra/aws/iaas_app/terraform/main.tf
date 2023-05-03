@@ -59,6 +59,15 @@ locals {
   }
 }
 
+module "s3" {
+  source = "../../terraform_modules/outline_s3_bucket"
+
+  env_name = "prod"
+  base_url = local.dns_name
+
+  default_tags = local.default_tags
+}
+
 module "alb_endpoint" {
   source = "../../terraform_modules/alb"
 
@@ -94,6 +103,7 @@ module "iam" {
 
   name             = "outline"
   cicd_bucket_name = data.terraform_remote_state.cicd.outputs.cicd_bucket_name
+  outline_bucket_policy_arn = module.s3.iam_policy.arn
 
   default_tags = local.default_tags
 }
@@ -145,14 +155,6 @@ module "asg" {
   asg_cpu_max_threshold     = 80
   asg_cpu_min_threshold     = 40
   default_tags              = local.default_tags
-}
-
-resource "aws_s3_bucket" "main" {
-  bucket = "awsiac-outline-prod2"
-}
-resource "aws_s3_bucket_acl" "main" {
-  bucket = aws_s3_bucket.main.id
-  acl    = "private"
 }
 
 # resource "aws_instance" "test_instance" {

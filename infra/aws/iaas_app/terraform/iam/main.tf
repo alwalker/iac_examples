@@ -48,7 +48,7 @@ EOF
   tags = var.default_tags
 }
 
-data "template_file" "policies" {
+data "template_file" "config_policies" {
   template = file("${path.module}/policy.json")
 
   vars = {
@@ -56,14 +56,18 @@ data "template_file" "policies" {
   }
 }
 
-resource "aws_iam_policy" "main" {
+resource "aws_iam_policy" "config" {
   name        = var.name
-  description = "Grant api permisions to do the things"
-  policy      = data.template_file.policies.rendered
+  description = "Grant access to config bucket"
+  policy      = data.template_file.config_policies.rendered
+}
+resource "aws_iam_role_policy_attachment" "config" {
+  role       = aws_iam_role.main.name
+  policy_arn = aws_iam_policy.config.arn
 }
 resource "aws_iam_role_policy_attachment" "main" {
   role       = aws_iam_role.main.name
-  policy_arn = aws_iam_policy.main.arn
+  policy_arn = var.outline_bucket_policy_arn
 }
 resource "aws_iam_role_policy_attachment" "cloudwatchagent" {
   role       = aws_iam_role.main.name

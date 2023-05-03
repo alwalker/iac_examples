@@ -48,7 +48,10 @@ resource "aws_s3_object" "env_file" {
   URL=${local.dns_name}
   PORT=${local.outline_port}
   FORCE_HTTPS=false
-  AWS_S3_UPLOAD_BUCKET_NAME=${aws_s3_bucket.main.id}
+  AWS_S3_UPLOAD_BUCKET_NAME=${module.s3.bucket.id}
+  AWS_S3_FORCE_PATH_STYLE=false
+  AWS_S3_UPLOAD_BUCKET_URL=https://${module.s3.bucket.bucket_regional_domain_name}
+  AWS_S3_UPLOAD_MAX_SIZE=262144000
   OIDC_CLIENT_ID=${module.cognito_client.self.id}
   OIDC_CLIENT_SECRET=${module.cognito_client.self.client_secret}
   OIDC_AUTH_URI=${data.terraform_remote_state.infra.outputs.prod.cognito.oauth_info["authorization_endpoint"]}
