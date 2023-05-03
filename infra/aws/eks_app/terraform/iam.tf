@@ -22,12 +22,6 @@ resource "aws_iam_policy" "main" {
                 "arn:aws:s3:::${aws_s3_bucket.main.id}",
                 "arn:aws:s3:::${aws_s3_bucket.main.id}/*"
             ]
-        },
-        {
-            "Sid": "VisualEditor1",
-            "Effect": "Allow",
-            "Action": ["ec2:DescribeTags"],
-            "Resource": ["*"]
         }
     ]
   }
@@ -47,7 +41,7 @@ data "aws_iam_policy_document" "trust" {
     condition {
       test     = "StringEquals"
       variable = "${replace(data.terraform_remote_state.infra.outputs.eks[0].eks.oidc_provider_arn, "/^(.*provider/)/", "")}:sub"
-      values   = ["system:serviceaccount:outline-${local.env_name}:outline"]
+      values   = ["system:serviceaccount:${local.env_name}-outline:outline"]
     }
 
     condition {

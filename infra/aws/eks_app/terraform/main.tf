@@ -95,11 +95,3 @@ module "database" {
 
   default_tags = local.default_tags
 }
-
-resource "aws_s3_bucket" "main" {
-  bucket = "awsiac-outline-prod"
-}
-# resource "aws_s3_bucket_acl" "main" {
-#   bucket = aws_s3_bucket.main.id
-#   acl    = "private"
-# }

@@ -21,6 +21,9 @@ resource "helm_release" "main" {
     image:
       repository: ${data.terraform_remote_state.cicd.outputs.outline_ecr_uri}
       tag: latest
+    serviceAccount:
+      annotations:
+        eks.amazonaws.com/role-arn: ${aws_iam_role.main.arn}
     service:
       port: ${local.outline_port}
       type: NodePort
