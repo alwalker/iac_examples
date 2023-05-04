@@ -48,8 +48,8 @@ resources:
   limits:
     memory: 2048Mi
   requests:
-    cpu: 1000m
-    memory: 1024Mi
+    cpu: 500m
+    memory: 256Mi
 
 autoscaling:
   enabled: true
