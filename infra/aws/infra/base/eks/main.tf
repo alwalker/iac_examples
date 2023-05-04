@@ -82,26 +82,6 @@ resource "aws_security_group" "bastion_api_access" {
 
   tags = merge({ Name = "${var.env_name}-eks-bastion-access" }, var.default_tags)
 }
-resource "aws_security_group" "coredns" {
-  name        = "${var.env_name}-eks-coredns"
-  vpc_id      = var.vpc_id
-  description = "Allow DNS requests from other nodes"
-
-  ingress {
-    from_port   = 53
-    to_port     = 53
-    protocol    = "tcp"
-    cidr_blocks = [for sn in data.aws_subnet.node_subnets : sn.cidr_block]
-  }
-  ingress {
-    from_port   = 53
-    to_port     = 53
-    protocol    = "udp"
-    cidr_blocks = [for sn in data.aws_subnet.node_subnets : sn.cidr_block]
-  }
-
-  tags = merge({ Name = "${var.env_name}-eks-bastion-access" }, var.default_tags)
-}
 
 module "vpc_cni_irsa" {
   source = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
@@ -189,36 +169,34 @@ module "eks" {
   control_plane_subnet_ids              = data.aws_subnets.valid_eks_control_plane_subnets.ids
   cluster_additional_security_group_ids = [aws_security_group.bastion_api_access.id]
 
+  node_security_group_additional_rules = {
+    bastion_ssh_access = {
+      type                     = "ingress"
+      protocol                 = "tcp"
+      from_port                = var.ssh_port
+      to_port                  = var.ssh_port
+      source_security_group_id = var.bastion_security_group_id
+      description              = "Allow ssh access from bastion"
+    }
+  }
+
   eks_managed_node_group_defaults = {
     ami_type       = "AL2_x86_64"
     instance_types = ["t3a.medium"]
 
     iam_role_attach_cni_policy = true
 
+    update_config = {
+      max_unavailable = 1
+    }
+
+    key_name = module.eks_ssh_key.aws_key_pair.key_name
+
     metadata_options = {
       http_endpoint               = "enabled"
       http_tokens                 = "required"
       http_put_response_hop_limit = 2
       instance_metadata_tags      = "disabled"
-    }
-
-    node_security_group_additional_rules = {
-      ingress_allow_access_from_control_plane = {
-        type                          = "ingress"
-        protocol                      = "tcp"
-        from_port                     = 9443
-        to_port                       = 9443
-        source_cluster_security_group = true
-        description                   = "Allow access from control plane to webhook port of AWS load balancer controller"
-      }
-      bastion_ssh_access = {
-        type                     = "ingress"
-        protocol                 = "tcp"
-        from_port                = var.ssh_port
-        to_port                  = var.ssh_port
-        source_security_group_id = var.bastion_security_group_id
-        description              = "Allow access from control plane to webhook port of AWS load balancer controller"
-      }
     }
   }
 
