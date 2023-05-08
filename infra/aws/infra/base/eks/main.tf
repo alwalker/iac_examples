@@ -178,6 +178,14 @@ module "eks" {
       source_security_group_id = var.bastion_security_group_id
       description              = "Allow ssh access from bastion"
     }
+    test_for_pdb = {
+      type                     = "ingress"
+      protocol                 = "tcp"
+      from_port                = 1025
+      to_port                  = 1025
+      source_security_group_id = var.bastion_security_group_id
+      description              = "Allow bullshit access from bastion"
+    }
   }
 
   eks_managed_node_group_defaults = {
@@ -265,7 +273,7 @@ module "eks" {
         testme = aws_iam_policy.apps_ecr_access.arn
       }
 
-      vpc_security_group_ids = [var.outline_security_group_id]
+      vpc_security_group_ids = [var.outline_security_group_id, aws_security_group.bastion_api_access.id]
 
       tags = {
         EKS-node-pool-name = "apps"

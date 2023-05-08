@@ -22,6 +22,7 @@ resource "helm_release" "main" {
     image:
       repository: ${data.terraform_remote_state.cicd.outputs.outline_ecr_uri}
       tag: latest
+    replicaCount: 2
     serviceAccount:
       annotations:
         eks.amazonaws.com/role-arn: ${aws_iam_role.main.arn}
