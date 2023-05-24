@@ -101,8 +101,8 @@ module "iam" {
   bastion_security_group_id = data.terraform_remote_state.infra.outputs.prod.bastion_security_group_id
   app_port                  = local.outline_port
 
-  name             = "outline"
-  cicd_bucket_name = data.terraform_remote_state.cicd.outputs.cicd_bucket_name
+  name                      = "outline"
+  cicd_bucket_name          = data.terraform_remote_state.cicd.outputs.cicd_bucket_name
   outline_bucket_policy_arn = module.s3.iam_policy.arn
 
   default_tags = local.default_tags
