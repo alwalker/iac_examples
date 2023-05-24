@@ -55,13 +55,19 @@ provider "helm" {
 module "add_ons" {
   source = "../../terraform_modules/eks-addons"
 
-  env_name              = "prod"
-  eks_oidc_provider_arn = data.terraform_remote_state.infra.outputs.eks[0].eks.oidc_provider_arn
-  aws_region_name       = data.aws_region.current.name
-  dns_zone_arn          = data.terraform_remote_state.infra.outputs.prod.dns_zone.arn
-  dns_zone_name         = data.terraform_remote_state.infra.outputs.prod.dns_zone.name
-  acm_cert_arn          = data.terraform_remote_state.infra.outputs.prod.acm_cert_arn
-  eks_cluster_name      = data.terraform_remote_state.infra.outputs.eks[0].eks.cluster_name
+  env_name                            = "prod"
+  eks_oidc_provider_arn               = data.terraform_remote_state.infra.outputs.eks[0].eks.oidc_provider_arn
+  aws_region_name                     = data.aws_region.current.name
+  dns_zone_arn                        = data.terraform_remote_state.infra.outputs.prod.dns_zone.arn
+  dns_zone_name                       = data.terraform_remote_state.infra.outputs.prod.dns_zone.name
+  acm_cert_arn                        = data.terraform_remote_state.infra.outputs.prod.acm_cert_arn
+  eks_cluster_name                    = data.terraform_remote_state.infra.outputs.eks[0].eks.cluster_name
+  eks_default_node_group_iam_role_arn = data.terraform_remote_state.infra.outputs.eks[0].eks.eks_managed_node_groups["default"].iam_role_arn
+  eks_default_node_group_guid = element(
+    split("/", data.terraform_remote_state.infra.outputs.eks[0].eks.eks_managed_node_groups["default"].node_group_arn),
+    length(split("/", data.terraform_remote_state.infra.outputs.eks[0].eks.eks_managed_node_groups["default"].node_group_arn)) - 1
+  )
+  outline_security_group_id = data.terraform_remote_state.infra.outputs.prod.outline_security_group_id
 
   default_tags = {
     managed_by_terraform = true

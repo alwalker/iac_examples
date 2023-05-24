@@ -187,6 +187,9 @@ module "eks" {
       description              = "Allow bullshit access from bastion"
     }
   }
+  node_security_group_tags = {
+    "karpenter.sh" = true
+  }
 
   eks_managed_node_group_defaults = {
     ami_type       = "AL2_x86_64"
@@ -209,75 +212,19 @@ module "eks" {
   }
 
   eks_managed_node_groups = {
-    system = {
-      name            = "system"
+    default = {
+      name            = "default"
       use_name_prefix = true
 
-      subnet_ids = data.aws_subnets.valid_eks_node_subnets.ids
+      min_size = 2
+      max_size = 9
 
-      min_size = 0
-      max_size = 2
-
-      force_update_version = true
-      instance_types       = ["t3a.small"]
-
-      labels = {
-        purpose = "system"
-      }
-      # taints = [
-      #   {
-      #     key    = "dedicated"
-      #     value  = "apps"
-      #     effect = "NO_SCHEDULE"
-      #   }
-      # ]
-
-      ebs_optimized           = true
-      disable_api_termination = false
-      enable_monitoring       = true
-
-      tags = {
-        EKS-node-pool-name = "apps"
-      }
-    }
-
-    apps = {
-      name            = "apps"
-      use_name_prefix = true
-
-      subnet_ids = data.aws_subnets.valid_eks_node_subnets.ids
-
-      min_size = 0
-      max_size = 7
-
-      capacity_type        = "SPOT"
       force_update_version = true
       instance_types       = ["t3a.medium"]
 
-      labels = {
-        purpose = "apps"
-      }
-      taints = [
-        {
-          key    = "dedicated"
-          value  = "apps"
-          effect = "NO_SCHEDULE"
-        }
-      ]
-
       ebs_optimized           = true
       disable_api_termination = false
       enable_monitoring       = true
-
-      iam_role_additional_policies = {
-        testme = aws_iam_policy.apps_ecr_access.arn
-      }
-
-      vpc_security_group_ids = [var.outline_security_group_id, aws_security_group.bastion_api_access.id]
-
-      tags = {
-        EKS-node-pool-name = "apps"
-      }
     }
   }
 

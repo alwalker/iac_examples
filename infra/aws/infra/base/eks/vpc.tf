@@ -1,5 +1,5 @@
 locals {
-  num_azs                   = length(var.vpc_availability_zones)
+  num_azs                   = 3 #length(var.vpc_availability_zones)
   eks_control_plane_subnets = length(var.vpc_eks_control_plane_subnets) == 0 ? [for i in range(local.num_azs) : cidrsubnet(var.vpc_cidr, 8, i + var.vpc_eks_control_plane_subnet_offset)] : var.vpc_eks_control_plane_subnets
   eks_node_subnets          = length(var.vpc_eks_node_subnets) == 0 ? [for i in range(local.num_azs) : cidrsubnet(var.vpc_cidr, 4, i + var.vpc_eks_node_subnet_offset)] : var.vpc_eks_node_subnets
 }
