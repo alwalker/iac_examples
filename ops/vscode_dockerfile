@@ -1,4 +1,4 @@
-ARG FEDORA_VERSION=38
+ARG FEDORA_VERSION=39
 ARG FEDORA_ARCH=x86_64
 FROM registry.fedoraproject.org/fedora:$FEDORA_VERSION-$FEDORA_ARCH
 
@@ -35,7 +35,7 @@ RUN curl -s https://dl.min.io/client/mc/release/linux-amd64/mc -o mc \
 RUN dnf config-manager --add-repo https://rpm.releases.hashicorp.com/fedora/hashicorp.repo \
     && dnf -y install packer terraform
 
-ARG FEDORA_VERSION=38
+ARG FEDORA_VERSION=39
 RUN rpm --import https://packages.microsoft.com/keys/microsoft.asc \
     && dnf install -y https://packages.microsoft.com/config/fedora/${FEDORA_VERSION}/packages-microsoft-prod.rpm \
     && dnf install -y azure-cli
@@ -54,7 +54,7 @@ RUN curl --silent --location "https://github.com/weaveworks/eksctl/releases/late
     && mv /tmp/eksctl /usr/local/bin \
     && chmod +x /usr/local/bin/eksctl
 
-ARG K9S_VERSION=v0.27.3
+ARG K9S_VERSION=v0.31.9
 RUN curl --silent --location "https://github.com/derailed/k9s/releases/download/${K9S_VERSION}/k9s_Linux_amd64.tar.gz" | tar xz -C /tmp \
     && mv /tmp/k9s /usr/local/bin
 
@@ -65,4 +65,4 @@ RUN curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/s
 
 RUN dnf install -y nodejs yarnpkg
 
-RUN dnf clean all  
+RUN dnf clean all

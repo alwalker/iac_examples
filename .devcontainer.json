@@ -1,16 +1,12 @@
 {
     "image": "outline_vscode",
-    "runArgs": [
-        "--userns=keep-id"
-    ],
     "remoteUser": "root",
     "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,z,type=bind",
     "workspaceFolder": "/workspace",
-    // ],
-    // "containerEnv": {
-    //     "MY_CONTAINER_VAR": "some-value-here",
-    //     "MY_CONTAINER_VAR2": "${localEnv:SOME_LOCAL_VAR}"
-    // },
+    "containerEnv": {
+        "AWS_REGION": "us-east-1",
+        "AWS_PAGER": ""
+    },
     "customizations": {
         "vscode": {
             "extensions": [
