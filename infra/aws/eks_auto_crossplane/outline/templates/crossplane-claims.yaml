@@ -1,0 +1,22 @@
+apiVersion: iacexamples.org/v1alpha1
+kind: S3Bucket
+metadata:
+  name: outline
+spec:
+  environment: nonprod
+  baseURL: iacexamples.com
+  appName: outline
+---
+apiVersion: iacexamples.org/v1alpha1
+kind: Redis
+metadata:
+  name: outline
+spec:
+  environment: nonprod
+  region: us-east-1
+  subnetIDs:
+    - subnet-0efe024bddbe3daf7
+    - subnet-0690c18441b7eeace
+  appSecurityGroupID: sg-045399458fa7e08b4
+  appName: outline
+  vpcID: vpc-05606b8d970656a12

@@ -1,0 +1,231 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: s3bucket
+spec:
+  compositeTypeRef:
+    apiVersion: iacexamples.org/v1alpha1
+    kind: xS3Bucket
+  mode: Pipeline
+  pipeline:
+  - step: environmentConfigs
+    functionRef:
+      name: function-environment-configs
+    input:
+      apiVersion: environmentconfigs.fn.crossplane.io/v1beta1
+      kind: Input
+      spec:
+        environmentConfigs:
+        - type: Selector
+          selector: 
+            matchLabels:
+              - key: environment
+                type: FromCompositeFieldPath
+                valueFromFieldPath: spec.environment
+  - step: patch-and-transform
+    functionRef:
+      name: function-patch-and-transform
+    input:
+      apiVersion: pt.fn.crossplane.io/v1beta1
+      kind: Resources
+      resources:
+      - name: app-bucket
+        base:
+          apiVersion: s3.aws.upbound.io/v1beta1
+          kind: Bucket
+        patches:
+          - type: CombineFromComposite
+            combine:
+              variables:
+                - fromFieldPath: spec.environment
+                - fromFieldPath: spec.appName
+              strategy: string
+              string:
+                fmt: "%s-%s"
+            toFieldPath: metadata.annotations[crossplane.io/external-name]
+          - type: FromEnvironmentFieldPath
+            fromFieldPath: region
+            toFieldPath: spec.forProvider.region
+      - name: app-bucket-ownership
+        base:
+          apiVersion: s3.aws.upbound.io/v1beta1
+          kind: BucketOwnershipControls
+          spec:
+            forProvider:
+              rule:
+                - objectOwnership: BucketOwnerPreferred
+        patches:
+          - type: FromEnvironmentFieldPath
+            fromFieldPath: region
+            toFieldPath: spec.forProvider.region
+          - type: CombineFromComposite
+            combine:
+              variables:
+                - fromFieldPath: spec.environment
+                - fromFieldPath: spec.appName
+              strategy: string
+              string:
+                fmt: "%s-%s"
+            toFieldPath: spec.forProvider.bucket
+      - name: app-bucket-block-public-access
+        base:
+          apiVersion: s3.aws.upbound.io/v1beta1
+          kind: BucketPublicAccessBlock
+          spec:
+            forProvider:
+              blockPublicAcls: false
+              blockPublicPolicy: false
+              ignorePublicAcls: false
+              restrictPublicBuckets: false
+        patches:
+          - type: FromEnvironmentFieldPath
+            fromFieldPath: region
+            toFieldPath: spec.forProvider.region
+          - type: CombineFromComposite
+            combine:
+              variables:
+                - fromFieldPath: spec.environment
+                - fromFieldPath: spec.appName
+              strategy: string
+              string:
+                fmt: "%s-%s"
+            toFieldPath: spec.forProvider.bucket
+      - name: app-bucket-private-acl
+        base:
+          apiVersion: s3.aws.upbound.io/v1beta1
+          kind: BucketACL
+          spec:
+            forProvider:
+              acl: private
+        patches:
+          - type: FromEnvironmentFieldPath
+            fromFieldPath: region
+            toFieldPath: spec.forProvider.region
+          - type: CombineFromComposite
+            combine:
+              variables:
+                - fromFieldPath: spec.environment
+                - fromFieldPath: spec.appName
+              strategy: string
+              string:
+                fmt: "%s-%s"
+            toFieldPath: spec.forProvider.bucket
+      - name: app-bucket-cors-config
+        base:
+          apiVersion: s3.aws.upbound.io/v1beta1
+          kind: BucketCorsConfiguration
+          spec:
+            forProvider:
+              corsRule:
+                - allowedHeaders:
+                    - "*"
+                  allowedMethods:
+                    - PUT
+                    - POST
+                - allowedMethods:
+                    - GET
+                  allowedOrigins:
+                    - "*"
+        patches:
+          - type: FromEnvironmentFieldPath
+            fromFieldPath: region
+            toFieldPath: spec.forProvider.region
+          - type: CombineFromComposite
+            combine:
+              variables:
+                - fromFieldPath: spec.environment
+                - fromFieldPath: spec.appName
+              strategy: string
+              string:
+                fmt: "%s-%s"
+            toFieldPath: spec.forProvider.bucket
+          - type: FromCompositeFieldPath
+            fromFieldPath: spec.baseURL
+            toFieldPath: spec.forProvider.corsRule[0].allowedOrigins[0]
+      - name: log-bucket
+        base:
+          apiVersion: s3.aws.upbound.io/v1beta1
+          kind: Bucket
+        patches:
+          - type: CombineFromComposite
+            combine:
+              variables:
+                - fromFieldPath: spec.environment
+                - fromFieldPath: spec.appName
+              strategy: string
+              string:
+                fmt: "%s-%s-logs"
+            toFieldPath: metadata.annotations[crossplane.io/external-name]
+          - type: FromEnvironmentFieldPath
+            fromFieldPath: region
+            toFieldPath: spec.forProvider.region
+      - name: log-bucket-ownership
+        base:
+          apiVersion: s3.aws.upbound.io/v1beta1
+          kind: BucketOwnershipControls
+          spec:
+            forProvider:
+              rule:
+                - objectOwnership: BucketOwnerPreferred
+        patches:
+          - type: FromEnvironmentFieldPath
+            fromFieldPath: region
+            toFieldPath: spec.forProvider.region
+          - type: CombineFromComposite
+            combine:
+              variables:
+                - fromFieldPath: spec.environment
+                - fromFieldPath: spec.appName
+              strategy: string
+              string:
+                fmt: "%s-%s-logs"
+            toFieldPath: spec.forProvider.bucket
+      - name: log-bucket-log-delivery-acl
+        base:
+          apiVersion: s3.aws.upbound.io/v1beta1
+          kind: BucketACL
+          spec:
+            forProvider:
+              acl: log-delivery-write
+        patches:
+          - type: FromEnvironmentFieldPath
+            fromFieldPath: region
+            toFieldPath: spec.forProvider.region
+          - type: CombineFromComposite
+            combine:
+              variables:
+                - fromFieldPath: spec.environment
+                - fromFieldPath: spec.appName
+              strategy: string
+              string:
+                fmt: "%s-%s"
+            toFieldPath: spec.forProvider.bucket
+      - name: app-bucket-logging
+        base:
+          apiVersion: s3.aws.upbound.io/v1beta1
+          kind: BucketLogging
+          spec:
+            forProvider:
+              targetPrefix: log/
+        patches:
+          - type: FromEnvironmentFieldPath
+            fromFieldPath: region
+            toFieldPath: spec.forProvider.region
+          - type: CombineFromComposite
+            combine:
+              variables:
+                - fromFieldPath: spec.environment
+                - fromFieldPath: spec.appName
+              strategy: string
+              string:
+                fmt: "%s-%s"
+            toFieldPath: spec.forProvider.bucket
+          - type: CombineFromComposite
+            combine:
+              variables:
+                - fromFieldPath: spec.environment
+                - fromFieldPath: spec.appName
+              strategy: string
+              string:
+                fmt: "%s-%s-logs"
+            toFieldPath: spec.forProvider.targetBucket

@@ -1,0 +1,114 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: redis
+spec:
+  compositeTypeRef:
+    apiVersion: iacexamples.org/v1alpha1
+    kind: xRedis
+  mode: Pipeline
+  pipeline:
+  - step: environmentConfigs
+    functionRef:
+      name: function-environment-configs
+    input:
+      apiVersion: environmentconfigs.fn.crossplane.io/v1beta1
+      kind: Input
+      spec:
+        environmentConfigs:
+        - type: Selector
+          selector: 
+            matchLabels:
+              - key: environment
+                type: FromCompositeFieldPath
+                valueFromFieldPath: spec.environment
+  - step: kcl
+    functionRef:
+      name: function-kcl
+    input:
+      apiVersion: krm.kcl.dev/v1alpha1
+      kind: KCLRun
+      metadata:
+        name: make-resources
+      spec:
+        target: Resources
+        source: |
+          oxr = option("params")?.oxr
+
+          environment = oxr.spec.environment
+          appName = oxr.spec.appName
+          appSecurityGroupID = oxr.spec.appSecurityGroupID
+          vpcID = oxr.spec.vpcID
+          subnetIDs = oxr.spec.subnetIDs
+          region = oxr.spec.region
+
+          securityGroup = {
+            apiVersion = "ec2.aws.upbound.io/v1beta1"
+            kind = "SecurityGroup"
+            metadata = {
+              labels = {
+                "testing.upbound.io/group" = appName + environment
+              }
+              name = appName + environment
+            }
+            spec = {
+              forProvider = {
+                description = "Allow Redis inbound traffic"
+                name = appName + environment
+                region = region
+                vpcId = vpcID
+              }
+            }
+          }
+
+          redisIngress = {
+            apiVersion = "ec2.aws.upbound.io/v1beta1"
+            kind = "SecurityGroupIngressRule"
+            metadata = {
+              labels = {
+                "testing.upbound.io/group" = appName + environment
+              }
+              name = appName + environment
+            }
+            spec = {
+              forProvider = {
+                fromPort = 6379
+                toPort = 6379
+                ipProtocol = "tcp"
+                region = region
+                referencedSecurityGroupId = appSecurityGroupID
+                securityGroupIdSelector = {
+                  matchLabels = {
+                    "testing.upbound.io/group" = appName + environment
+                  }
+                }
+              }
+            }
+          }
+          
+          redis = {
+            apiVersion = "elasticache.aws.upbound.io/v1beta1"
+            kind = "ServerlessCache"
+            metadata = {
+              name = appName + environment
+            }
+            spec = {
+              forProvider = {
+                cacheUsageLimits = [{
+                  dataStorage = [{
+                    maximum = 10
+                    unit = "GB"
+                  }]
+                  ecpuPerSecond = [{
+                    maximum = 5000
+                  }]
+                }]
+                engine = "redis"
+                majorEngineVersion = "7"
+                region = region
+                subnetIds = subnetIDs 
+              }
+            }
+          }
+
+          items = [securityGroup, redisIngress, redis]

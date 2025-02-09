@@ -1,0 +1,37 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: xredises.iacexamples.org
+spec:
+  group: iacexamples.org
+  names:
+    kind: xRedis
+    plural: xredises
+  claimNames:
+    kind: Redis
+    plural: redises
+  versions:
+  - name: v1alpha1
+    served: true
+    referenceable: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              environment:
+                type: string
+              region:
+                type: string
+              subnetIDs:
+                type: array
+                items:
+                  type: string
+              appName:
+                type: string
+              appSecurityGroupID:
+                type: string
+              vpcID:
+                type: string

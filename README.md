@@ -11,9 +11,10 @@ This is a collection of examples using both different tech stacks as well as inf
     /infra - example hosting implementations
         /aws - Examples that primarily live in AWS
             /cicd - CICD components such as IAM roles, S3 buckets, and OCI repositories
-            /infra - core infrastructure such as networking and databases as well as top level  objects like ECS/EKS clusters by IaC tool
+            /infra - core infrastructure such as networking and databases as well as top level objects like ECS/EKS clusters by IaC tool
             /fargate_app - hosting with serverless containers
             /iaas_app - traditional hosting with ASGs
+            /eks_auto_crossplane - An attempt at a simple implementation of everything using EKS Auto Mode and Crossplane
 ```
 
 ## Setup Instructions

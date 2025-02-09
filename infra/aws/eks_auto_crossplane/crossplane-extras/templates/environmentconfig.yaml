@@ -1,0 +1,10 @@
+apiVersion: apiextensions.crossplane.io/v1beta1
+kind: EnvironmentConfig
+metadata:
+  name: {{ .Values.clusterName }}
+  namespace: crossplane-system
+  labels:
+    environment: {{ .Values.clusterName }}
+data:
+  vpcID: {{ .Values.vpcID }}
+  region: us-east-1
