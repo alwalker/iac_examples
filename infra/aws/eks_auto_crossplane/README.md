@@ -1,0 +1,5 @@
+# EKS Auto Mode And Crossplane
+
+### 2025-02-08
+
+This was supposed to be a short script that spun up EKS with `eksctl` and the new "auto mode" feature then used Crossplane to provision S3, Redis, and RDS. However the default settings for auto mode involve creating node pools that use instance types that the sandboxes don't like. When researching how to change this it turned out that you can't modify the default node pools you can only not create them and make your own instead: https://docs.aws.amazon.com/eks/latest/userguide/set-builtin-node-pools.html.  Unfortunately doing this almost completely negates the benefits of auto mode. In order to do this you have to make your own node pools, which means you have to make your own node class, which means you have to make your own security groups and enough other things that you might as well use the Terraform modules.
